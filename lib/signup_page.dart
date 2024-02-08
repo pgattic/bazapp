@@ -23,7 +23,7 @@ class SignUpPage extends StatelessWidget {
           children: [
             // Your logo here
             Image.asset(
-              'assets/images/logo.jpg',
+              'assets/images/logo.png',
               width: 150,
               height: 150,
             ),

@@ -35,7 +35,7 @@ class _LoginPageState extends State<LoginPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Image.asset(
-                'assets/images/logo.jpg',
+                'assets/images/logo.png',
                 width: 150, // Adjust the size as needed
                 height: 150, // Adjust the size as needed
               ),
@@ -90,14 +90,6 @@ class _LoginPageState extends State<LoginPage> {
                 },
                 child: const Text('Login'),
               ),
-              const SizedBox(height: 8),
-              ElevatedButton(
-                onPressed: () {
-                  // Implement password reset function
-                  _resetPassword(_emailController.text);
-                },
-                child: const Text('Forgot Password'),
-              ),
               const SizedBox(height: 50),
               TextButton(
                 onPressed: () {
@@ -110,6 +102,14 @@ class _LoginPageState extends State<LoginPage> {
               // Display the password reset message.
               Text(_passwordResetMessage,
                   style: TextStyle(color: Colors.green)),
+              const SizedBox(height: 8),
+              ElevatedButton(
+                onPressed: () {
+                  // Implement password reset function
+                  _resetPassword(_emailController.text);
+                },
+                child: const Text('Forgot Password'),
+              ),
             ],
           ),
         ),
