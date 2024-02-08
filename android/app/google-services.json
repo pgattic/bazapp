@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "728787975612",
+    "project_id": "bazapp-6c828",
+    "storage_bucket": "bazapp-6c828.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:728787975612:android:f4aef7caf2ebd9a0babfb9",
+        "android_client_info": {
+          "package_name": "com.example.bazapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyARUfWBr9bXByhFfMLcgRHR1pjtQpbGUGg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
