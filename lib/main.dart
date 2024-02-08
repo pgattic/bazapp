@@ -1,16 +1,26 @@
-import 'package:bazapp/home_page.dart';
+import 'dart:collection';
+
+import 'login_page.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/services.dart';
+
+import 'firebase/auth_provider.dart';
 import 'firebase_options.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
+import 'package:firebase_core/firebase_core.dart';
 
-import 'signup_page.dart';
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-Future<void> main() async {
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => AuthProvider()),
+      ],
+      child: const MyApp(),
+    ),
   );
-  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -19,22 +29,48 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: StreamBuilder<User?>(
-        stream: FirebaseAuth.instance.authStateChanges(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.active) {
-            final user = snapshot.data;
-            if (user != null) {
-              // User is authenticated, navigate to home screen.
-              return const HomePage();
-            } else {
-              // User is not authenticated, navigate to Sign Up page.
-              return SignUpPage();
-            }
+      title: 'Your App',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: Consumer<AuthProvider>(
+        builder: (context, authProvider, child) {
+          final user = authProvider.user;
+          SystemChrome.setPreferredOrientations([
+            DeviceOrientation.portraitUp,
+            DeviceOrientation.portraitDown,
+          ]);
+
+          // Check if the user is authenticated
+          if (user != null) {
+            return HomeScreen(); // Return HomeScreen when the user is authenticated
+          } else {
+            return LoginPage(); // Return LoginPage when the user is not authenticated
           }
-          return const CircularProgressIndicator(); // Loading state
         },
       ),
+    );
+  }
+}
+
+class HomeScreen extends StatelessWidget {
+  const HomeScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final user = Provider.of<AuthProvider>(context).user;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Bazapp'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.person),
+            onPressed: () {},
+          ),
+        ],
+      ),
+      body: Center(),
     );
   }
 }

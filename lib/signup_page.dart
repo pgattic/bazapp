@@ -1,99 +1,103 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'firebase/auth_provider.dart';
+import 'login_page.dart';
+import 'main.dart';
+import 'package:provider/provider.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
-class SignUpPage extends StatefulWidget {
-  @override
-  _SignUpPageState createState() => _SignUpPageState();
-}
+class SignUpPage extends StatelessWidget {
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController displayNameController = TextEditingController();
 
-class _SignUpPageState extends State<SignUpPage> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore =
-      FirebaseFirestore.instance; // Initialize Firestore
-  TextEditingController _emailController = TextEditingController();
-  TextEditingController _passwordController = TextEditingController();
-
-  Future<void> _createUserWithEmailAndPassword() async {
-    try {
-      final credential = await _auth.createUserWithEmailAndPassword(
-        email: _emailController.text,
-        password: _passwordController.text,
-      );
-
-      // Create a Firestore document for the user
-      await _firestore.collection('users').doc(credential.user!.uid).set({
-        'username': '', // Set the username (you can update this later)
-        'email': credential.user!.email,
-        'password': _passwordController
-            .text, // Note: Storing passwords in plaintext is not recommended
-        'Icon': '', // Set the user's icon (you can update this later)
-        'user_info': [], // Initialize an empty list for user_info
-      });
-
-      print('User registered: ${credential.user?.email}');
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'weak-password') {
-        print('The password provided is too weak.');
-      } else if (e.code == 'email-already-in-use') {
-        print('The account already exists for that email.');
-      }
-    } catch (e) {
-      print(e);
-    }
-  }
+  SignUpPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Sign Up'),
-      ),
-      body: Center(
+      body: Padding(
+        padding: const EdgeInsets.all(12.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.account_circle,
-              size: 80,
-              color: Colors.blue,
+            // Your logo here
+            Image.asset(
+              'assets/images/logo.jpg',
+              width: 150,
+              height: 150,
             ),
-            const SizedBox(height: 20),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: TextField(
-                controller: _emailController,
-                decoration: const InputDecoration(
-                  hintText: 'Enter your email',
+            const SizedBox(height: 16),
+            const Text(
+              'Sign Up',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: emailController,
+              decoration: InputDecoration(
+                labelText: 'Email',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: TextField(
-                controller: _passwordController,
-                obscureText: true,
-                decoration: const InputDecoration(
-                  hintText: 'Enter your password',
+            const SizedBox(height: 8),
+            TextFormField(
+              controller: passwordController,
+              obscureText: true,
+              decoration: InputDecoration(
+                labelText: 'Password',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
                 ),
               ),
             ),
+            const SizedBox(height: 8),
+            TextFormField(
+              controller: displayNameController,
+              decoration: InputDecoration(
+                labelText: 'Display Name',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: _createUserWithEmailAndPassword,
+              onPressed: () {
+                final password = passwordController.text;
+                if (password.length < 6) {
+                  // Show a toast message for password requirements
+                  Fluttertoast.showToast(
+                    msg: 'Password must be at least 6 characters',
+                    toastLength: Toast.LENGTH_SHORT,
+                  );
+                } else {
+                  Provider.of<AuthProvider>(context, listen: false)
+                      .signUp(
+                    email: emailController.text,
+                    password: password,
+                    displayName: displayNameController.text,
+                  )
+                      .then((result) {
+                    // Successfully signed up
+                    Navigator.of(context).push(
+                        MaterialPageRoute(builder: (context) => LoginPage()));
+                  }).catchError((error) {
+                    // Handle the error here
+                    print('Error signing up: $error');
+                  });
+                }
+              },
               child: const Text('Sign Up'),
             ),
-            GestureDetector(
-              onTap: () {
-                // Navigate to Login page
-                Navigator.pushReplacementNamed(context, '/login');
+            TextButton(
+              onPressed: () {
+                // Navigate to the login page
+                Navigator.of(context).pop();
               },
-              child: const Text(
-                'Already have an account? Log in',
-                style: TextStyle(
-                  color: Colors.blue,
-                  decoration: TextDecoration.underline,
-                ),
-              ),
+              child: const Text("Already have an account? Login"),
             ),
           ],
         ),
