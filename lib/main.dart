@@ -1,5 +1,7 @@
 import 'dart:collection';
 
+import 'package:bazapp/map/map.dart';
+
 import 'login_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -70,7 +72,7 @@ class HomeScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: Center(),
+      body: MapDisplay(),
     );
   }
 }
