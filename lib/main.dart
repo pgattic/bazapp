@@ -1,5 +1,3 @@
-import 'dart:collection';
-
 import 'package:bazapp/app_colors.dart';
 import 'package:bazapp/map/map.dart';
 

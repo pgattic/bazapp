@@ -34,11 +34,11 @@ class _LoginPageState extends State<LoginPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Image.asset(
-                'assets/images/logo.png',
-                width: 150, // Adjust the size as needed
-                height: 150, // Adjust the size as needed
-              ),
+              // Image.asset(
+              //   'assets/images/logo.png',
+              //   width: 150, // Adjust the size as needed
+              //   height: 150, // Adjust the size as needed
+              // ),
               const SizedBox(height: 16),
               const Text(
                 'Login',
