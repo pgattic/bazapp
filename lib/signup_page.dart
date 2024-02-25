@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'firebase/auth_provider.dart';
 import 'login_page.dart';
-import 'main.dart';
 import 'package:provider/provider.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 

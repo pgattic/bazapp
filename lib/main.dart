@@ -1,6 +1,9 @@
+<<<<<<< HEAD
 import 'dart:collection';
 
 import 'package:bazapp/MessagesScreen.dart';
+=======
+>>>>>>> 0038a773b58c9b8082510bf6d51beecc305ae591
 import 'package:bazapp/app_colors.dart';
 import 'package:bazapp/map/map.dart';
 
