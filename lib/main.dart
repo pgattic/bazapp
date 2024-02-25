@@ -1,5 +1,6 @@
 import 'dart:collection';
 
+import 'package:bazapp/MessagesScreen.dart';
 import 'package:bazapp/app_colors.dart';
 import 'package:bazapp/map/map.dart';
 
@@ -147,15 +148,6 @@ class FeedScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Text('Feed Screen'), // Example content
-    );
-  }
-}
-
-class MessagesScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Text('Messages Screen'), // Example content
     );
   }
 }

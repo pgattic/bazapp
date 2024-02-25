@@ -114,6 +114,8 @@ class AuthProvider extends ChangeNotifier {
     final user = FirebaseAuth.instance.currentUser;
     return user != null;
   }
+
+  static of(BuildContext context) {}
 }
 
 class User {
@@ -167,13 +169,15 @@ class MessageService {
     });
   }
 
-  Stream<QuerySnapshot> getChatMessages(String chatId) {
+  Stream<QuerySnapshot> getChatMessages(String chatId, String otherUserId) {
     return _firestore
         .collection('messages')
         .where('chatId', isEqualTo: chatId)
         .orderBy('timestamp', descending: true)
         .snapshots();
   }
+
+  getUsersByDisplayName(String text) {}
 }
 
 class Event {
