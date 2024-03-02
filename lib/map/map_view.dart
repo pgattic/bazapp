@@ -1,5 +1,5 @@
-import 'package:bazapp/data/map_event.dart';
-import 'package:bazapp/data/map_event_type.dart';
+import 'package:bazapp/data/event.dart';
+import 'package:bazapp/data/event_type.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -7,49 +7,56 @@ import 'package:latlong2/latlong.dart';
 //import 'package:url_launcher/url_launcher.dart';
 
 
-class MapDisplay extends StatefulWidget {
+class MapView extends StatefulWidget {
 
-  MapDisplay({super.key});
+  MapView({super.key});
 
   @override
-  State<MapDisplay> createState() => _MapDisplayState();
+  State<MapView> createState() => _MapViewState();
 }
 
-class _MapDisplayState extends State<MapDisplay> {
+class _MapViewState extends State<MapView> {
   final mapController = MapController();
 
-  List<CustomMapEvent> mapEventList = [
-    CustomMapEvent(
+  List<CustomEvent> mapEventList = [
+    CustomEvent(
       const LatLng(51.509364, -0.128928),
       DateTime.now(),
       "Party",
       "This is a test event",
       EventType.party,
     ),
-    CustomMapEvent(
+    CustomEvent(
       const LatLng(52.509364, -0.128928),
       DateTime.now(),
       "Service",
       "This is a test event",
       EventType.service,
     ),
-    CustomMapEvent(
+    CustomEvent(
       const LatLng(53.509364, -0.128928),
       DateTime.now(),
       "Sale",
       "This is a test event",
       EventType.sale,
     ),
-    CustomMapEvent(
+    CustomEvent(
       const LatLng(54.509364, -0.128928),
       DateTime.now(),
       "Buy my stuff",
       "This is a test event",
       EventType.sale,
     ),
+    CustomEvent(
+      const LatLng(55.509364, -0.128928),
+      DateTime.now(),
+      "this is epic",
+      "poggers",
+      EventType.service,
+    )
   ];
 
-  void addEvent(CustomMapEvent event) { // Invoke this function from the parent class in order to add an event to the loaded events.
+  void addEvent(CustomEvent event) { // Invoke this function from the parent class in order to add an event to the loaded events.
     mapEventList.add(event);
   }
 

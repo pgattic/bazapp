@@ -1,8 +1,7 @@
-import 'dart:collection';
 import 'package:bazapp/MessagesScreen.dart';
 
 import 'package:bazapp/app_colors.dart';
-import 'package:bazapp/map/map.dart';
+import 'package:bazapp/map/map_view.dart';
 
 import 'login_page.dart';
 import 'package:flutter/material.dart';
@@ -93,7 +92,7 @@ class _HomeScreenState extends State<HomeScreen> {
       case 0:
         return FeedScreen(); // Replace with your MapDisplay widget
       case 1:
-        return MapDisplay(); // Replace with your MapDisplay widget
+        return MapView(); // Replace with your MapDisplay widget
       case 2:
         return MessagesScreen(); // Replace with your MessagesScreen widget
       case 3:
