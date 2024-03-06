@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'firebase/auth_provider.dart';
-import 'firebase/message_service.dart' as messageService;
 
 class ChatScreen extends StatefulWidget {
-  final String otherUserId;
+  final String? userId;
+  final String? otherUserId;
 
-  ChatScreen({required this.otherUserId});
+  ChatScreen({required this.userId, required this.otherUserId});
 
   @override
   _ChatScreenState createState() => _ChatScreenState();
@@ -13,12 +13,31 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController messageController = TextEditingController();
+  late Future<String?> displayNameFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    displayNameFuture =
+        MessageService().getDisplayNameByUserId(widget.otherUserId);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.otherUserId), // Replace with user display name
+        title: FutureBuilder<String?>(
+          future: displayNameFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return CircularProgressIndicator();
+            } else if (snapshot.hasError || snapshot.data == null) {
+              return Text('Error fetching display name');
+            } else {
+              return Text(snapshot.data!);
+            }
+          },
+        ),
       ),
       body: Column(
         children: [
@@ -33,10 +52,10 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Widget _buildChatMessages() {
     return StreamBuilder<List<Message>>(
-      stream: messageService.MessageService().getChatMessages(
-        AuthProvider.of(context).user?.uid,
+      stream: MessageService().getChatMessages(
+        widget.userId,
         widget.otherUserId,
-      ) as Stream<List<Message>>, // Explicitly cast to the correct type
+      ),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(child: CircularProgressIndicator());
@@ -90,13 +109,14 @@ class _ChatScreenState extends State<ChatScreen> {
     String messageText = messageController.text.trim();
 
     if (messageText.isNotEmpty) {
-      messageService.MessageService().sendMessage(
+      MessageService().sendMessage(
         Message(
-          senderId: AuthProvider.of(context).user?.uid,
+          senderId: widget.userId,
           recipientId: widget.otherUserId,
           text: messageText,
           timestamp: DateTime.now(),
-        ) as messageService.Message,
+          read: false,
+        ),
       );
       messageController.clear();
     }

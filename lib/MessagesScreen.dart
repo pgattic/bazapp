@@ -5,6 +5,9 @@ import 'firebase/auth_provider.dart';
 import 'firebase/message_service.dart' as messageService;
 
 class MessagesScreen extends StatefulWidget {
+  final User user; // Accept user information
+  MessagesScreen({Key? key, required this.user}) : super(key: key);
+
   @override
   _MessagesScreenState createState() => _MessagesScreenState();
 }
@@ -22,7 +25,9 @@ class _MessagesScreenState extends State<MessagesScreen> {
         children: [
           _buildSearchBar(),
           _buildUserDropDown(),
-          _buildRecentChats(),
+          Expanded(
+            child: _buildRecentChats(),
+          ),
         ],
       ),
     );
@@ -33,6 +38,11 @@ class _MessagesScreenState extends State<MessagesScreen> {
       padding: const EdgeInsets.all(8.0),
       child: TextField(
         controller: searchController,
+        onChanged: (value) {
+          setState(() {
+            // Trigger rebuild on search bar text change
+          });
+        },
         decoration: InputDecoration(
           labelText: 'Search for users by display name',
           border: OutlineInputBorder(
@@ -45,34 +55,43 @@ class _MessagesScreenState extends State<MessagesScreen> {
 
   Widget _buildUserDropDown() {
     return StreamBuilder<List<String>>(
-      // Assuming you have a method in MessageService to get users by display name
-      stream: MessageService().getUsersByDisplayName(searchController.text),
+      stream: MessageService().getUsersByDisplayName(
+        searchController.text.isNotEmpty
+            ? searchController.text
+            : '', // Pass an empty string to get all users when search is empty
+      ),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return CircularProgressIndicator();
+          return Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
           return Text('Error fetching users');
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return Container(); // No results, return an empty container
         } else {
           List<String> users = snapshot.data!;
-          return ListView.builder(
-            itemCount: users.length,
-            itemBuilder: (context, index) {
-              String userName = users[index];
-              return GestureDetector(
-                onTap: () {
-                  // Handle user selection, for example, open a chat with the selected user
-                  _openChatWith(userName);
-                },
-                child: Card(
-                  margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  child: ListTile(
-                    title: Text(userName),
+          return Container(
+            height: 160, // Limit the height to show at most 4 users
+            child: ListView.builder(
+              itemCount: users.length > 4 ? 4 : users.length,
+              itemBuilder: (context, index) {
+                String userName = users[index];
+                return GestureDetector(
+                  onTap: () async {
+                    String? userId = await MessageService().getCurrentUserId();
+                    String? otherUserId =
+                        await MessageService().getUserIdByDisplayName(userName);
+
+                    _openChatWith(userId, otherUserId);
+                  },
+                  child: Card(
+                    margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    child: ListTile(
+                      title: Text(userName),
+                    ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           );
         }
       },
@@ -80,45 +99,57 @@ class _MessagesScreenState extends State<MessagesScreen> {
   }
 
   Widget _buildRecentChats() {
-    return Expanded(
-      child: StreamBuilder<List<String>>(
-        // Use StreamBuilder instead of FutureBuilder
-        stream: messageService.MessageService().getRecentChats(
-          Provider.of<AuthProvider>(context).user!.uid,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text(
+            'Your past chats:',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
         ),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error fetching recent chats'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text('No recent chats'));
-          } else {
-            return ListView.builder(
-              itemCount: snapshot.data!.length,
-              itemBuilder: (context, index) {
-                String userId = snapshot.data![index];
-                return GestureDetector(
-                  onTap: () => _openChatWith(userId),
-                  child: Card(
-                    margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    child: ListTile(
-                      title: Text(userId), // Replace with user display name
-                    ),
-                  ),
+        Expanded(
+          child: StreamBuilder<List<String>>(
+            stream: MessageService().getRecentChats(widget.user.uid),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: CircularProgressIndicator());
+              } else if (snapshot.hasError) {
+                return Center(child: Text('Error fetching recent chats'));
+              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                return Center(child: Text('No recent chats'));
+              } else {
+                return ListView.builder(
+                  itemCount: snapshot.data!.length,
+                  itemBuilder: (context, index) {
+                    String displayName = snapshot.data![index];
+                    return GestureDetector(
+                      onTap: () => _openChatWith(
+                          MessageService().getCurrentUserId(), displayName),
+                      child: Card(
+                        margin:
+                            EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        child: ListTile(
+                          title: Text('Chat with $displayName'),
+                        ),
+                      ),
+                    );
+                  },
                 );
-              },
-            );
-          }
-        },
-      ),
+              }
+            },
+          ),
+        ),
+      ],
     );
   }
 
-  void _openChatWith(String userId) {
+  void _openChatWith(String? userId, String? otherUserId) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => ChatScreen(otherUserId: userId),
+        builder: (context) =>
+            ChatScreen(userId: userId, otherUserId: otherUserId),
       ),
     );
   }

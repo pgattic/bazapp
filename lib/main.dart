@@ -32,13 +32,14 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Your App',
+      title: 'Bazapp',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
       home: Consumer<AuthProvider>(
         builder: (context, authProvider, child) {
           final user = authProvider.user;
+          print('User: $user');
           SystemChrome.setPreferredOrientations([
             DeviceOrientation.portraitUp,
             DeviceOrientation.portraitDown,
@@ -46,7 +47,7 @@ class MyApp extends StatelessWidget {
 
           // Check if the user is authenticated
           if (user != null) {
-            return HomeScreen(); // Return HomeScreen when the user is authenticated
+            return HomeScreen(user: user); // Pass the user to HomeScreen
           } else {
             return LoginPage(); // Return LoginPage when the user is not authenticated
           }
@@ -57,14 +58,14 @@ class MyApp extends StatelessWidget {
 }
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  final User user; // Receive user information
+  const HomeScreen({Key? key, required this.user}) : super(key: key);
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  //final user = Provider.of<AuthProvider>(context).user;
   int _currentIndex = 0; // Initialize with the default index (e.g., home)
 
   @override
@@ -78,6 +79,7 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: () {
               // Handle user profile action
               // You can navigate to a profile screen or show user details here
+              // Access user information using widget.user
             },
           ),
         ],
@@ -90,15 +92,17 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildContent() {
     switch (_currentIndex) {
       case 0:
-        return FeedScreen(); // Replace with your MapDisplay widget
+        return FeedScreen(); // Pass the user to FeedScreen
       case 1:
-        return MapView(); // Replace with your MapDisplay widget
+        return MapView();
+      //return MapView(user: widget.user); // Pass the user to MapView
       case 2:
-        return MessagesScreen(); // Replace with your MessagesScreen widget
+        return MessagesScreen(
+            user: widget.user); // Pass the user to MessagesScreen
       case 3:
-        return CalendarScreen(); // Replace with your CalendarScreen widget
+      //return CalendarScreen(user: widget.user); // Pass the user to CalendarScreen
       case 4:
-        return UserProfileScreen(); // Replace with your UserProfileScreen widget
+      //return UserProfileScreen(user: widget.user); // Pass the user to UserProfileScreen
       default:
         return Container(); // Fallback (you can customize this)
     }
@@ -106,14 +110,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildBottomNavigationBar() {
     return BottomNavigationBar(
-      type:
-          BottomNavigationBarType.fixed, // Fixed type for less than four items
-      selectedItemColor: AppColors.primaryColor, // Use your primary color
-      unselectedItemColor: AppColors.textColor, // Use your text color
+      type: BottomNavigationBarType.fixed,
+      selectedItemColor: AppColors.primaryColor,
+      unselectedItemColor: AppColors.textColor,
       currentIndex: _currentIndex,
       onTap: (index) {
         setState(() {
-          _currentIndex = index; // Update the selected index
+          _currentIndex = index;
         });
       },
       items: [
@@ -145,8 +148,23 @@ class _HomeScreenState extends State<HomeScreen> {
 class FeedScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Text('Feed Screen'), // Example content
+    return Consumer<AuthProvider>(
+      builder: (context, authProvider, child) {
+        final user = authProvider.user;
+
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'Welcome to the Feed, ${user?.displayName ?? 'Guest'}!',
+                style: TextStyle(fontSize: 20),
+              ),
+              // Add your feed content here
+            ],
+          ),
+        );
+      },
     );
   }
 }

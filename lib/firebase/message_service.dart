@@ -15,18 +15,27 @@ class MessageService {
     });
   }
 
-  Stream<List<String>> getUsersByDisplayName(String displayName) {
-    return _firestore
-        .collection('users')
-        .where('displayName', isGreaterThanOrEqualTo: displayName)
-        .where('displayName',
-            isLessThan: displayName + 'z') // Adjust for case sensitivity
-        .snapshots()
-        .map((snapshot) {
-      return snapshot.docs.map((doc) {
-        return doc['displayName'] as String;
-      }).toList();
-    });
+  Stream<List<String>> getUsersByDisplayName([String? displayName]) {
+    if (displayName == null || displayName.isEmpty) {
+      // Return all users when displayName is null or empty
+      return _firestore.collection('users').snapshots().map((snapshot) {
+        return snapshot.docs.map((doc) {
+          return doc['displayName'] as String;
+        }).toList();
+      });
+    } else {
+      // Return filtered users based on displayName
+      return _firestore
+          .collection('users')
+          .where('displayName', isGreaterThanOrEqualTo: displayName)
+          .where('displayName', isLessThan: displayName + 'z')
+          .snapshots()
+          .map((snapshot) {
+        return snapshot.docs.map((doc) {
+          return doc['displayName'] as String;
+        }).toList();
+      });
+    }
   }
 
   Stream<List<Message>> getChatMessages(

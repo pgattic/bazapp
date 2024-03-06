@@ -21,11 +21,6 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
 
-    if (authProvider.user != null) {
-      // If the user is already signed in, navigate to the main page
-      return HomeScreen();
-    }
-
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(12.0),

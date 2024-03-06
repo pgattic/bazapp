@@ -143,41 +143,164 @@ class User {
 }
 
 class Message {
-  String? senderId;
-  String? recipientId;
-  String text;
-  DateTime timestamp;
+  final String? senderId;
+  final String? recipientId;
+  final String text;
+  final DateTime timestamp;
+  final bool read; // Added 'read' field
 
   Message({
     required this.senderId,
     required this.recipientId,
     required this.text,
     required this.timestamp,
+    required this.read,
   });
 }
 
 class MessageService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  Future<void> sendMessage(Message message, String chatId) async {
+  String? getCurrentUserId() {
+    final user = FirebaseAuth.instance.currentUser;
+    return user?.uid;
+  }
+
+  Future<String?> getDisplayNameByUserId(String? userId) async {
+    try {
+      DocumentSnapshot userSnapshot =
+          await _firestore.collection('users').doc(userId).get();
+
+      if (userSnapshot.exists) {
+        // Return the display name of the user with the given UID
+        return userSnapshot['displayName'] as String?;
+      } else {
+        // Return null if no user is found with the given UID
+        return null;
+      }
+    } catch (e) {
+      // Handle errors, such as Firestore query errors
+      print('Error getting display name by user ID: $e');
+      return null;
+    }
+  }
+
+  Future<String?> getUserIdByDisplayName(String displayName) async {
+    try {
+      QuerySnapshot querySnapshot = await _firestore
+          .collection('users')
+          .where('displayName', isEqualTo: displayName)
+          .limit(1)
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        // Return the UID of the first user found with the given display name
+        return querySnapshot.docs.first.id;
+      } else {
+        // Return null if no user is found with the given display name
+        return null;
+      }
+    } catch (e) {
+      // Handle errors, such as Firestore query errors
+      print('Error getting user ID by display name: $e');
+      return null;
+    }
+  }
+
+  String _generateChatId(String? userId1, String? userId2) {
+    List<String?> userIds = [userId1, userId2];
+    userIds.sort();
+    return userIds.join('_');
+  }
+
+  Future<void> markAsRead(String messageId) async {
+    await _firestore.collection('messages').doc(messageId).update({
+      'read': true,
+    });
+  }
+
+  Future<void> sendMessage(Message message) async {
+    String chatId = _generateChatId(message.senderId, message.recipientId);
+
     await _firestore.collection('messages').add({
+      'chatId': chatId, // Use the generated chat ID
       'senderId': message.senderId,
       'recipientId': message.recipientId,
       'text': message.text,
       'timestamp': message.timestamp,
-      'chatId': chatId,
+      'read': false,
     });
   }
 
-  Stream<QuerySnapshot> getChatMessages(String chatId, String otherUserId) {
+  Stream<List<Message>> getChatMessages(String? chatId, String? otherUserId) {
     return _firestore
         .collection('messages')
         .where('chatId', isEqualTo: chatId)
         .orderBy('timestamp', descending: true)
-        .snapshots();
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs.map((doc) {
+        return Message(
+          senderId: doc['senderId'] as String,
+          recipientId: doc['recipientId'] as String,
+          text: doc['text'] as String,
+          timestamp: (doc['timestamp'] as Timestamp).toDate(),
+          read: doc['read'] as bool,
+        );
+      }).toList();
+    });
   }
 
-  getUsersByDisplayName(String text) {}
+  Stream<List<String>> getUsersByDisplayName([String? displayName]) {
+    if (displayName == null || displayName.isEmpty) {
+      // Return all users when displayName is null or empty
+      return _firestore.collection('users').snapshots().map((snapshot) {
+        return snapshot.docs.map((doc) {
+          return doc['displayName'] as String;
+        }).toList();
+      });
+    } else {
+      // Return filtered users based on displayName
+      return _firestore
+          .collection('users')
+          .where('displayName', isGreaterThanOrEqualTo: displayName)
+          .where('displayName', isLessThan: displayName + 'z')
+          .snapshots()
+          .map((snapshot) {
+        return snapshot.docs.map((doc) {
+          return doc['displayName'] as String;
+        }).toList();
+      });
+    }
+  }
+
+  Stream<List<String>> getRecentChats(String? userId) {
+    return _firestore
+        .collection('chats')
+        .where('chatId',
+            isGreaterThanOrEqualTo: userId) // Use >= for the chatId
+        .where('chatId', isLessThan: userId! + 'z') // Use < for the chatId
+        .snapshots()
+        .map((snapshot) {
+      List<String> recentChats = [];
+
+      for (QueryDocumentSnapshot chat in snapshot.docs) {
+        String chatId = chat['chatId'] as String;
+
+        // Extract the other user ID from the chatId
+        String otherUserId = chatId.replaceAll(userId!, '');
+
+        // Fetch and add the display name of the other user
+        MessageService()
+            .getDisplayNameByUserId(otherUserId)
+            .then((displayName) {
+          recentChats.add(displayName!);
+        });
+      }
+
+      return recentChats;
+    });
+  }
 }
 
 class Event {
