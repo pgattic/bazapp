@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class AuthProvider extends ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -40,7 +43,8 @@ class AuthProvider extends ChangeNotifier {
             email: email,
             displayName: displayName,
             icon: genericIconUrl,
-            eventIds: []); // Assign the generic icon URL
+            eventIds: [], // Assign the generic icon URL
+            chats: []);
         notifyListeners();
       }
     } catch (e) {
@@ -65,13 +69,13 @@ class AuthProvider extends ChangeNotifier {
 
       if (user != null) {
         _user = User(
-          uid: user.uid,
-          email: email,
-          displayName:
-              user.displayName ?? '', // You can handle null display name
-          icon: '', // You can assign an icon if needed
-          eventIds: [], // You can assign event IDs if needed
-        );
+            uid: user.uid,
+            email: email,
+            displayName:
+                user.displayName ?? '', // You can handle null display name
+            icon: '', // You can assign an icon if needed
+            eventIds: [], // You can assign event IDs if needed
+            chats: []);
         notifyListeners();
         print('Login successful');
       }
@@ -104,6 +108,64 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  Future<String> uploadProfilePicture(File imageFile) async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+
+      if (user == null) {
+        throw Exception('User not logged in');
+      }
+
+      final storageRef = FirebaseStorage.instance
+          .ref()
+          .child('profile_pictures/${user.uid}.jpg');
+      await storageRef.putFile(imageFile);
+      final downloadUrl = await storageRef.getDownloadURL();
+
+      // Update user's icon in Firestore
+      await _firestore.collection('users').doc(user.uid).update({
+        'icon': downloadUrl,
+      });
+
+      // Update local user object
+      _user?.icon = downloadUrl;
+      notifyListeners();
+
+      return downloadUrl;
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  // Update user profile information
+  Future<void> updateUserProfile(String profilePictureUrl) async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+
+      if (user == null) {
+        throw Exception('User not logged in');
+      }
+
+      // Update user's display name and profile picture URL
+      await user.updateDisplayName(
+          _user?.displayName ?? ''); // You can pass the display name
+      await user.updatePhotoURL(profilePictureUrl);
+
+      // Update user document in Firestore
+      await _firestore.collection('users').doc(user.uid).update({
+        'displayName': _user?.displayName ?? '',
+        'icon': profilePictureUrl,
+      });
+
+      // Update local user object
+      _user?.displayName = _user?.displayName ?? '';
+      _user?.icon = profilePictureUrl;
+      notifyListeners();
+    } catch (e) {
+      throw e;
+    }
+  }
+
   void setUserIconURL(String iconURL, context) {
     final authProvider = Provider.of<AuthProvider>(context);
     final user = authProvider.user;
@@ -124,6 +186,7 @@ class User {
   String displayName;
   String icon;
   List<String> eventIds;
+  List<String> chats; // Change this to a List<String>
 
   User({
     required this.uid,
@@ -131,7 +194,8 @@ class User {
     required this.displayName,
     required this.icon,
     required this.eventIds,
-  });
+    List<String>? chats, // Change the type here
+  }) : chats = chats ?? [];
 
   setEventIds(List<String> eventIds, {required String value}) {
     eventIds.add(value);
@@ -156,151 +220,6 @@ class Message {
     required this.timestamp,
     required this.read,
   });
-}
-
-class MessageService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
-  String? getCurrentUserId() {
-    final user = FirebaseAuth.instance.currentUser;
-    return user?.uid;
-  }
-
-  Future<String?> getDisplayNameByUserId(String? userId) async {
-    try {
-      DocumentSnapshot userSnapshot =
-          await _firestore.collection('users').doc(userId).get();
-
-      if (userSnapshot.exists) {
-        // Return the display name of the user with the given UID
-        return userSnapshot['displayName'] as String?;
-      } else {
-        // Return null if no user is found with the given UID
-        return null;
-      }
-    } catch (e) {
-      // Handle errors, such as Firestore query errors
-      print('Error getting display name by user ID: $e');
-      return null;
-    }
-  }
-
-  Future<String?> getUserIdByDisplayName(String displayName) async {
-    try {
-      QuerySnapshot querySnapshot = await _firestore
-          .collection('users')
-          .where('displayName', isEqualTo: displayName)
-          .limit(1)
-          .get();
-
-      if (querySnapshot.docs.isNotEmpty) {
-        // Return the UID of the first user found with the given display name
-        return querySnapshot.docs.first.id;
-      } else {
-        // Return null if no user is found with the given display name
-        return null;
-      }
-    } catch (e) {
-      // Handle errors, such as Firestore query errors
-      print('Error getting user ID by display name: $e');
-      return null;
-    }
-  }
-
-  String _generateChatId(String? userId1, String? userId2) {
-    List<String?> userIds = [userId1, userId2];
-    userIds.sort();
-    return userIds.join('_');
-  }
-
-  Future<void> markAsRead(String messageId) async {
-    await _firestore.collection('messages').doc(messageId).update({
-      'read': true,
-    });
-  }
-
-  Future<void> sendMessage(Message message) async {
-    String chatId = _generateChatId(message.senderId, message.recipientId);
-
-    await _firestore.collection('messages').add({
-      'chatId': chatId, // Use the generated chat ID
-      'senderId': message.senderId,
-      'recipientId': message.recipientId,
-      'text': message.text,
-      'timestamp': message.timestamp,
-      'read': false,
-    });
-  }
-
-  Stream<List<Message>> getChatMessages(String? chatId, String? otherUserId) {
-    return _firestore
-        .collection('messages')
-        .where('chatId', isEqualTo: chatId)
-        .orderBy('timestamp', descending: true)
-        .snapshots()
-        .map((snapshot) {
-      return snapshot.docs.map((doc) {
-        return Message(
-          senderId: doc['senderId'] as String,
-          recipientId: doc['recipientId'] as String,
-          text: doc['text'] as String,
-          timestamp: (doc['timestamp'] as Timestamp).toDate(),
-          read: doc['read'] as bool,
-        );
-      }).toList();
-    });
-  }
-
-  Stream<List<String>> getUsersByDisplayName([String? displayName]) {
-    if (displayName == null || displayName.isEmpty) {
-      // Return all users when displayName is null or empty
-      return _firestore.collection('users').snapshots().map((snapshot) {
-        return snapshot.docs.map((doc) {
-          return doc['displayName'] as String;
-        }).toList();
-      });
-    } else {
-      // Return filtered users based on displayName
-      return _firestore
-          .collection('users')
-          .where('displayName', isGreaterThanOrEqualTo: displayName)
-          .where('displayName', isLessThan: displayName + 'z')
-          .snapshots()
-          .map((snapshot) {
-        return snapshot.docs.map((doc) {
-          return doc['displayName'] as String;
-        }).toList();
-      });
-    }
-  }
-
-  Stream<List<String>> getRecentChats(String? userId) {
-    return _firestore
-        .collection('chats')
-        .where('chatId',
-            isGreaterThanOrEqualTo: userId) // Use >= for the chatId
-        .where('chatId', isLessThan: userId! + 'z') // Use < for the chatId
-        .snapshots()
-        .map((snapshot) {
-      List<String> recentChats = [];
-
-      for (QueryDocumentSnapshot chat in snapshot.docs) {
-        String chatId = chat['chatId'] as String;
-
-        // Extract the other user ID from the chatId
-        String otherUserId = chatId.replaceAll(userId!, '');
-
-        // Fetch and add the display name of the other user
-        MessageService()
-            .getDisplayNameByUserId(otherUserId)
-            .then((displayName) {
-          recentChats.add(displayName!);
-        });
-      }
-
-      return recentChats;
-    });
-  }
 }
 
 class Event {

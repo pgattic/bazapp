@@ -1,4 +1,5 @@
 import 'package:bazapp/MessagesScreen.dart';
+import 'package:bazapp/UserProfileScreen.dart';
 
 import 'package:bazapp/app_colors.dart';
 import 'package:bazapp/map/map_view.dart';
@@ -102,7 +103,7 @@ class _HomeScreenState extends State<HomeScreen> {
       case 3:
       //return CalendarScreen(user: widget.user); // Pass the user to CalendarScreen
       case 4:
-      //return UserProfileScreen(user: widget.user); // Pass the user to UserProfileScreen
+        return UserProfileScreen(); // Pass the user to UserProfileScreen
       default:
         return Container(); // Fallback (you can customize this)
     }
@@ -174,15 +175,6 @@ class CalendarScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Text('Calendar Screen'), // Example content
-    );
-  }
-}
-
-class UserProfileScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Text('User Profile Screen'), // Example content
     );
   }
 }

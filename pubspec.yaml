@@ -43,6 +43,9 @@ dependencies:
   flutter_map: ^6.1.0
   calendar_view: ^1.0.4
   latlong2: ^0.9.0
+  flutter_image_compress: ^2.1.0
+  image_picker: ^1.0.7
+  firebase_storage: ^11.6.9
 
 dev_dependencies:
   flutter_test:
