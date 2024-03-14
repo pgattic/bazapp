@@ -13,6 +13,25 @@ class AuthProvider extends ChangeNotifier {
 
   User? get user => _user;
 
+  Future<void> addEvent(Event event) async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+
+      if (user == null) {
+        throw Exception('User not logged in');
+      }
+
+      // Add event to Firestore
+      await FirebaseFirestore.instance.collection('events').add(event.toMap());
+
+      // Add event ID to user's eventIds list
+      _user?.eventIds.add(event.eventId);
+      notifyListeners();
+    } catch (e) {
+      throw e;
+    }
+  }
+
   // Sign-up function
   // Updated signUp function
   Future<void> signUp(
@@ -231,6 +250,9 @@ class Event {
   final double latitude;
   final double longitude;
   final String userId;
+  final String color;
+  final String createdFlag;
+  final String followedFlag;
 
   Event({
     required this.eventId,
@@ -241,6 +263,9 @@ class Event {
     required this.latitude,
     required this.longitude,
     required this.userId,
+    required this.color,
+    required this.createdFlag,
+    required this.followedFlag,
   });
 
   // Convert Event to Map for Firestore
@@ -254,6 +279,9 @@ class Event {
       'longitude': longitude,
       'eventType': eventType,
       'userId': userId,
+      'color': color,
+      'createdFlag': createdFlag,
+      'followedFlag': followedFlag
     };
   }
 }

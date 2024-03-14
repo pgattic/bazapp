@@ -1,17 +1,16 @@
 import 'package:bazapp/MessagesScreen.dart';
 import 'package:bazapp/UserProfileScreen.dart';
-
 import 'package:bazapp/app_colors.dart';
+import 'package:bazapp/calendar_view.dart';
+import 'package:bazapp/firebase_options.dart';
+import 'package:bazapp/login_page.dart';
 import 'package:bazapp/map/map_view.dart';
-
-import 'login_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
-import 'firebase/auth_provider.dart';
-import 'firebase_options.dart';
+import 'package:bazapp/firebase/auth_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:calendar_view/calendar_view.dart'; // Import calendar_view package
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,7 +27,7 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -101,7 +100,7 @@ class _HomeScreenState extends State<HomeScreen> {
         return MessagesScreen(
             user: widget.user); // Pass the user to MessagesScreen
       case 3:
-      //return CalendarScreen(user: widget.user); // Pass the user to CalendarScreen
+        return CalendarScreen(); // Pass the user to CalendarScreen
       case 4:
         return UserProfileScreen(); // Pass the user to UserProfileScreen
       default:
@@ -166,15 +165,6 @@ class FeedScreen extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-}
-
-class CalendarScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Text('Calendar Screen'), // Example content
     );
   }
 }
