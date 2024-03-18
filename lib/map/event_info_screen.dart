@@ -1,17 +1,22 @@
+import 'package:bazapp/data/event_type.dart';
 import 'package:flutter/material.dart';
 
 class EventInfoScreen extends StatelessWidget {
   final DateTime dateTime;
   final String title;
   final String description;
+  final EventType type;
 
-  const EventInfoScreen({super.key, required this.dateTime, required this.title, required this.description});
+  const EventInfoScreen({super.key, required this.dateTime, required this.title, required this.description, required this.type});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Event Information - $title'),
+        title: Row(children: [
+          Text('Event Information '),
+          type.infoScreenIcon,
+        ],),
       ),
       body: SingleChildScrollView(
         child: Padding(

@@ -37,6 +37,7 @@ class CustomEvent {
             dateTime: date,
             title: title,
             description: description,
+            type: type,
             // Pass other event information as needed
           );
         },
@@ -85,7 +86,7 @@ class CustomEvent {
       height: 80,
       child: GestureDetector(
         onTap: () { displayBottomSheet(context); },
-        child: type.icon,
+        child: type.mapIcon,
       ),
       rotate: true,
     );
