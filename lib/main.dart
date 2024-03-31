@@ -98,7 +98,8 @@ class _HomeScreenState extends State<HomeScreen> {
       //return MapView(user: widget.user); // Pass the user to MapView
       case 2:
         return MessagesScreen(
-            user: widget.user); // Pass the user to MessagesScreen
+          user: widget.user
+        ); // Pass the user to MessagesScreen
       case 3:
         return CalendarScreen(); // Pass the user to CalendarScreen
       case 4:

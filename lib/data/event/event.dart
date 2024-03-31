@@ -1,4 +1,4 @@
-import 'package:bazapp/data/event_type.dart';
+import 'package:bazapp/data/event/event_type.dart';
 import 'package:bazapp/map/event_info_screen.dart';
 import 'package:calendar_view/calendar_view.dart';
 import 'package:flutter/material.dart';

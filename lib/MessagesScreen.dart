@@ -109,7 +109,6 @@ class _MessagesScreenState extends State<MessagesScreen> {
     );
   }
 
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   List<Widget> chatButtons = [];
   Set<String> uniqueUserIds = Set(); // Store unique user IDs
 

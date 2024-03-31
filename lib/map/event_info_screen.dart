@@ -1,4 +1,4 @@
-import 'package:bazapp/data/event_type.dart';
+import 'package:bazapp/data/event/event_type.dart';
 import 'package:flutter/material.dart';
 
 class EventInfoScreen extends StatelessWidget {

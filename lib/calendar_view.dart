@@ -1,4 +1,4 @@
-import 'package:bazapp/data/event_type.dart';
+import 'package:bazapp/data/event/event_type.dart';
 import 'package:flutter/material.dart';
 import 'package:calendar_view/calendar_view.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -15,21 +15,16 @@ class CalendarScreen extends StatelessWidget {
     return CalendarControllerProvider<Object?>(
       controller: EventController<Object?>(), // Provide the controller here
       child: Scaffold(
-        appBar: AppBar(
-          title: Text('Calendar'),
-          actions: [
-            IconButton(
-              icon: Icon(Icons.add),
-              onPressed: () {
-                print("Add button tapped!"); // Debug print statement
-                _createEvent(context);
-              },
-            ),
-          ],
-        ),
         body: Builder(
           builder: (BuildContext context) {
             return MonthView();
+          },
+        ),
+        floatingActionButton: FloatingActionButton(
+          child: Icon(Icons.add),
+          onPressed:  () {
+            print("Add button tapped!"); // Debug print statement
+            _createEvent(context);
           },
         ),
       ),

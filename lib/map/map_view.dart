@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:bazapp/data/event.dart';
-import 'package:bazapp/data/event_type.dart';
+import 'package:bazapp/data/event/event.dart';
+import 'package:bazapp/data/event/event_type.dart';
 
 class MapView extends StatefulWidget {
   MapView({super.key});
