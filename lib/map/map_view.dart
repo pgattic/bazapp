@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:location/location.dart' as loc;
 import 'package:bazapp/data/event/event.dart';
 import 'package:bazapp/data/event/event_type.dart';
 
 class MapView extends StatefulWidget {
-  MapView({super.key});
+  MapView({Key? key}) : super(key: key);
 
   @override
   State<MapView> createState() => _MapViewState();
@@ -13,6 +14,49 @@ class MapView extends StatefulWidget {
 
 class _MapViewState extends State<MapView> {
   final mapController = MapController();
+  LatLng? currentLocation;
+  bool isLocationCentered = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _getLocation();
+  }
+
+  void _getLocation() async {
+    loc.Location location = loc.Location();
+
+    bool serviceEnabled = false;
+    loc.PermissionStatus _permissionGranted;
+    loc.LocationData _locationData;
+
+    serviceEnabled = await location.serviceEnabled();
+    if (!serviceEnabled) {
+      serviceEnabled = await location.requestService();
+      if (!serviceEnabled) {
+        return;
+      }
+    }
+
+    _permissionGranted = await location.hasPermission();
+    if (_permissionGranted == loc.PermissionStatus.denied) {
+      _permissionGranted = await location.requestPermission();
+      if (_permissionGranted != loc.PermissionStatus.granted) {
+        return;
+      }
+    }
+
+    location.onLocationChanged.listen((loc.LocationData currentLocation) {
+      setState(() {
+        this.currentLocation =
+            LatLng(currentLocation.latitude!, currentLocation.longitude!);
+        if (!isLocationCentered) {
+          mapController.move(this.currentLocation!, 15.0);
+          isLocationCentered = true;
+        }
+      });
+    });
+  }
 
   void _showMapPopup(BuildContext context) {
     showDialog(
@@ -26,7 +70,8 @@ class _MapViewState extends State<MapView> {
           renderBox: box,
           mapController: mapController,
           details: LongPressStartDetails(
-              globalPosition: box.size.center(Offset.zero)),
+            globalPosition: box.size.center(Offset.zero),
+          ),
         );
       },
     ).then((value) {
@@ -36,7 +81,7 @@ class _MapViewState extends State<MapView> {
     });
   }
 
-  List<CustomEvent> mapEventList = [
+  List<CustomEvent> mapEventList = [ // TODO: Get events from database, not hardcoded
     CustomEvent(
       const LatLng(51.509364, -0.128928),
       DateTime.now(),
@@ -80,10 +125,18 @@ class _MapViewState extends State<MapView> {
 
   @override
   Widget build(BuildContext context) {
+    LatLng initialCenter = LatLng(51.509364, -0.128928);
+    double initialZoom = 9.2;
+
+    if (currentLocation != null && !isLocationCentered) {
+      initialCenter = currentLocation!;
+      initialZoom = 15.0;
+    }
+
     return FlutterMap(
       options: MapOptions(
-        initialCenter: LatLng(51.509364, -0.128928),
-        initialZoom: 9.2,
+        initialCenter: initialCenter,
+        initialZoom: initialZoom,
         maxZoom: 20,
         onLongPress: (tapPos, point) {
           print('Long press at: ${point.latitude}, ${point.longitude}');
@@ -96,9 +149,22 @@ class _MapViewState extends State<MapView> {
           userAgentPackageName: 'com.example.app',
         ),
         MarkerLayer(
-          markers: mapEventList
-              .map((mapEvent) => mapEvent.toMarker(context))
-              .toList(),
+          markers: [
+            if (currentLocation != null)
+              Marker(
+                width: 30.0,
+                height: 30.0,
+                point: currentLocation!,
+                child: const Icon(
+                  Icons.circle,
+                  color: Colors.blue,
+                  size: 30.0,
+                ),
+              ),
+              ...mapEventList
+                .map((mapEvent) => mapEvent.toMarker(context))
+                .toList(),
+          ],
         ),
       ],
     );
