@@ -14,8 +14,8 @@ class EventInfoScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Row(children: [
-          Text('Event Information '),
           type.infoScreenIcon,
+          Text(' Event Information'),
         ],),
       ),
       body: SingleChildScrollView(

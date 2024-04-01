@@ -101,4 +101,33 @@ class CustomEvent {
       endTime: endTime,
     );
   }
+
+  Widget toFeedThumbnail(BuildContext context) {
+    return GestureDetector(
+      child: Card(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            ListTile(
+              leading: type.infoScreenIcon,
+              title: Text(title),
+              subtitle: Text(description),
+            ),
+//            Row(
+//              mainAxisAlignment: MainAxisAlignment.end,
+//              children: <Widget>[
+//                const SizedBox(width: 8),
+//                TextButton(
+//                  child: const Text('INFO'),
+//                  onPressed: () => displayInfoScreen(context),
+//                ),
+//                const SizedBox(width: 8),
+//              ],
+//            ),
+          ],
+        ),
+      ),
+      onTap: () => displayInfoScreen(context),
+    );
+  }
 }

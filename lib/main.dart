@@ -2,6 +2,7 @@ import 'package:bazapp/MessagesScreen.dart';
 import 'package:bazapp/UserProfileScreen.dart';
 import 'package:bazapp/app_colors.dart';
 import 'package:bazapp/calendar_view.dart';
+import 'package:bazapp/feed/feed_view.dart';
 import 'package:bazapp/firebase_options.dart';
 import 'package:bazapp/login_page.dart';
 import 'package:bazapp/map/map_view.dart';
@@ -10,7 +11,6 @@ import 'package:flutter/services.dart';
 import 'package:bazapp/firebase/auth_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:calendar_view/calendar_view.dart'; // Import calendar_view package
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -144,30 +144,6 @@ class _HomeScreenState extends State<HomeScreen> {
           label: 'User',
         ),
       ],
-    );
-  }
-}
-
-class FeedScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<AuthProvider>(
-      builder: (context, authProvider, child) {
-        final user = authProvider.user;
-
-        return Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'Welcome to the Feed, ${user?.displayName ?? 'Guest'}!',
-                style: TextStyle(fontSize: 20),
-              ),
-              // Add your feed content here
-            ],
-          ),
-        );
-      },
     );
   }
 }
