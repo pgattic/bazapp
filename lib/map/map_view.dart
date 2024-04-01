@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -16,19 +18,19 @@ class _MapViewState extends State<MapView> {
   final mapController = MapController();
   LatLng? currentLocation;
   bool isLocationCentered = false;
+  late loc.Location location;
+  late StreamSubscription<loc.LocationData> locationSubscription;
 
   @override
   void initState() {
     super.initState();
+    location = loc.Location();
     _getLocation();
   }
 
   void _getLocation() async {
-    loc.Location location = loc.Location();
-
     bool serviceEnabled = false;
     loc.PermissionStatus _permissionGranted;
-    loc.LocationData _locationData;
 
     serviceEnabled = await location.serviceEnabled();
     if (!serviceEnabled) {
@@ -46,11 +48,11 @@ class _MapViewState extends State<MapView> {
       }
     }
 
-    location.onLocationChanged.listen((loc.LocationData currentLocation) {
+    locationSubscription = location.onLocationChanged.listen((loc.LocationData currentLocation) {
       setState(() {
-        this.currentLocation =
-            LatLng(currentLocation.latitude!, currentLocation.longitude!);
         if (!isLocationCentered) {
+          this.currentLocation =
+              LatLng(currentLocation.latitude!, currentLocation.longitude!);
           mapController.move(this.currentLocation!, 15.0);
           isLocationCentered = true;
         }
@@ -81,7 +83,7 @@ class _MapViewState extends State<MapView> {
     });
   }
 
-  List<CustomEvent> mapEventList = [ // TODO: Get events from database, not hardcoded
+  List<CustomEvent> mapEventList = [
     CustomEvent(
       const LatLng(51.509364, -0.128928),
       DateTime.now(),
@@ -121,6 +123,12 @@ class _MapViewState extends State<MapView> {
 
   void addEvent(CustomEvent event) {
     mapEventList.add(event);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    locationSubscription.cancel();
   }
 
   @override

@@ -1,4 +1,5 @@
 import 'package:bazapp/data/event/event_type.dart';
+import 'package:bazapp/firebase/auth_provider.dart';
 import 'package:bazapp/map/event_info_screen.dart';
 import 'package:calendar_view/calendar_view.dart';
 import 'package:flutter/material.dart';
@@ -26,7 +27,56 @@ class CustomEvent {
   String description;
   EventType type;
 
-  CustomEvent(this.location, this.date, this.title, this.description, this.type);
+  CustomEvent(this.location, this.date, this.title, this.description, this.type, [this.startTime, this.endTime]);
+
+//  String getFormattedTimeRange() { // Get time in 12-hour format
+//    if (startTime != null && endTime != null) {
+//      var sHour = startTime!.hour % 12;
+//      var sMin = startTime!.minute;
+//      var sSign = startTime!.hour > 11 ? 'pm' : 'am';
+//      var eHour = endTime!.hour % 12;
+//      var eMin = endTime!.minute;
+//      var eSign = endTime!.hour > 11 ? 'pm' : 'am';
+//      return '$sHour:$sMin${sSign==eSign?"":sSign} - $eHour:$eMin$eSign';
+//    } else {
+//      return '';
+//    }
+//  }
+
+  String getFormattedStartTime() {
+    if (startTime != null) {
+      var hour = startTime!.hour % 12;
+      var min = startTime!.minute;
+      var minString = min < 10 ? '0$min' : min.toString();
+      var sign = startTime!.hour > 11 ? 'pm' : 'am';
+      return '$hour:$minString$sign';
+    } else {
+      return '';
+    }
+  }
+
+  String getFormattedDate() {
+    final months = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ];
+
+    final day = date.day;
+    final month = months[date.month - 1];
+    final year = date.year;
+
+    return '$month $day, $year';
+  }
 
   void displayInfoScreen(BuildContext context) {
     Navigator.push(
@@ -103,6 +153,7 @@ class CustomEvent {
   }
 
   Widget toFeedThumbnail(BuildContext context) {
+    var timeTag = startTime == null ? '' : ' at ${getFormattedStartTime()}';
     return GestureDetector(
       child: Card(
         child: Column(
@@ -111,7 +162,13 @@ class CustomEvent {
             ListTile(
               leading: type.infoScreenIcon,
               title: Text(title),
-              subtitle: Text(description),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(description),
+                  Text("${getFormattedDate()}$timeTag")
+                ],
+              ),
             ),
 //            Row(
 //              mainAxisAlignment: MainAxisAlignment.end,
