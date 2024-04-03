@@ -9,7 +9,7 @@ enum EventType {
   service(
     stringName: "Service",
     icon: Icons.construction,
-    color: Colors.red,
+    color: Colors.orange,
   ),
   sale(
     stringName: "Sale",
@@ -41,15 +41,11 @@ enum EventType {
   });
 
   static EventType fromString(String name) {
-    switch (name) {
-      case "Party":
-        return EventType.party;
-      case "Service":
-        return EventType.service;
-      case "Sale":
-        return EventType.sale;
-      default:
-        return EventType.other;
+    for (var type in EventType.values) {
+      if (type.stringName.toLowerCase() == name.trim().toLowerCase()) {
+        return type;
+      }
     }
+    return EventType.other;
   }
 }

@@ -37,12 +37,15 @@ class Constants {
 
     final day = dateTime.day;
     final month = months[dateTime.month - 1];
-    final year = dateTime.year;
 
-    return '$month $day, $year';
+    return '$month $day';
+  }
+
+  static String getFormattedDateWithYear(DateTime dateTime) {
+    return '${getFormattedDate(dateTime)} ${dateTime.year}';
   }
 
   static String yMMMMd(DateTime dateTime) {
-    return "${getFormattedDate(dateTime)} at ${getFormattedTime(dateTime)}";
+    return "${getFormattedDateWithYear(dateTime)} at ${getFormattedTime(dateTime)}";
   }
 }

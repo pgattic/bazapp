@@ -19,7 +19,6 @@ import 'package:latlong2/latlong.dart';
 */
 
 class CustomEvent {
-
   String? id;
   String? userId;
   LatLng location;
@@ -28,7 +27,9 @@ class CustomEvent {
   String description;
   EventType type;
 
-  CustomEvent(this.location, this.dateTime, this.title, this.description, this.type, [this.id, this.userId]);
+  CustomEvent(
+      this.location, this.dateTime, this.title, this.description, this.type,
+      [this.id, this.userId]);
 
 //  String getFormattedTimeRange() { // Get time in 12-hour format
 //    if (startTime != null && endTime != null) {
@@ -48,6 +49,10 @@ class CustomEvent {
     return Constants.getFormattedTime(dateTime);
   }
 
+  String getFormattedDateWithYear() {
+    return Constants.getFormattedDateWithYear(dateTime);
+  }
+
   String getFormattedDate() {
     return Constants.getFormattedDate(dateTime);
   }
@@ -58,11 +63,7 @@ class CustomEvent {
       MaterialPageRoute(
         builder: (BuildContext context) {
           return EventInfoScreen(
-            dateTime: dateTime,
-            title: title,
-            description: description,
-            type: type,
-            // Pass other event information as needed
+            event: this,
           );
         },
       ),
@@ -73,26 +74,56 @@ class CustomEvent {
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
-        return Padding(
-          padding: const EdgeInsets.all(16.0),
+        return Container(
+          padding: const EdgeInsets.all(16),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('Information about the markerInformation about the marker...'),
+              Row(
+                children: [
+                  type.infoScreenIcon,
+                  const SizedBox(width: 8),
+                  const Text(
+                    'Event Details',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                title,
+                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                description,
+                style: const TextStyle(fontSize: 16),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                Constants.yMMMMd(dateTime),
+                style: const TextStyle(fontSize: 16),
+              ),
+              const SizedBox(height: 8),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  OutlinedButton(
-                    child: const Text('Information'),
+                  ElevatedButton(
                     onPressed: () {
                       displayInfoScreen(context);
                     },
+                    child: const Text('More Info'),
                   ),
+                  const SizedBox(width: 16),
                   TextButton(
-                    child: const Text('Cancel'),
                     onPressed: () {
                       Navigator.pop(context);
                     },
+                    child: const Text('Close'),
                   ),
                 ],
               ),
@@ -109,14 +140,42 @@ class CustomEvent {
       width: 80,
       height: 80,
       child: GestureDetector(
-        onTap: () { displayBottomSheet(context); },
-        child: Column(
-          // centered contents
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
+        onTap: () {
+          displayBottomSheet(context);
+        },
+        child: Stack(
+          alignment: Alignment.center,
           children: [
-            type.mapIcon,
-            Text(getFormattedDate(), style: const TextStyle(fontSize: 12)),
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: type.color,
+                shape: BoxShape.circle,
+              ),
+            ),
+            Icon(
+              type.icon,
+              color: Colors.white,
+              size: 30,
+            ),
+            Positioned(
+              bottom: 0,
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 8),
+                decoration: BoxDecoration(
+                  color: type.color,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  getFormattedDate(),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -130,7 +189,8 @@ class CustomEvent {
       date: dateTime,
       description: description,
       startTime: dateTime,
-      endTime: dateTime.add(const Duration(hours: 1)), // TODO: Add user-specified duration
+      endTime: dateTime
+          .add(const Duration(hours: 1)), // TODO: Add user-specified duration
     );
   }
 

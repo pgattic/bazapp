@@ -1,35 +1,58 @@
-import 'package:bazapp/data/event/event_type.dart';
+import 'package:bazapp/data/event/event.dart';
 import 'package:flutter/material.dart';
 
 class EventInfoScreen extends StatelessWidget {
-  final DateTime dateTime;
-  final String title;
-  final String description;
-  final EventType type;
+  final CustomEvent event;
 
-  const EventInfoScreen({super.key, required this.dateTime, required this.title, required this.description, required this.type});
+  const EventInfoScreen({Key? key, required this.event}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Row(children: [
-          type.infoScreenIcon,
-          Text(' Event Information'),
-        ],),
+        title: Text('Event Details'),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text('Date: ${dateTime.toString()}'),
-              const SizedBox(height: 8),
-              Text('Description: $description'),
-              // Add more information as needed
-            ],
-          ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              event.title,
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 16),
+            Text(
+              event.description,
+              style: TextStyle(
+                fontSize: 16,
+              ),
+            ),
+            SizedBox(height: 16),
+            Text(
+              'Date: ${event.getFormattedDateWithYear()}',
+              style: TextStyle(
+                fontSize: 16,
+              ),
+            ),
+            SizedBox(height: 16),
+            Text(
+              'Time: ${event.getFormattedStartTime()}',
+              style: TextStyle(
+                fontSize: 16,
+              ),
+            ),
+            SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text('Close'),
+            ),
+          ],
         ),
       ),
     );

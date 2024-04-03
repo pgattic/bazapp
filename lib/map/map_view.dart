@@ -32,7 +32,8 @@ class _MapViewState extends State<MapView> {
     _fetchEvents();
 
     // Listen for changes in AuthProvider
-    Provider.of<AuthProvider>(context, listen: false).addListener(_onAuthProviderChange);
+    Provider.of<AuthProvider>(context, listen: false)
+        .addListener(_onAuthProviderChange);
   }
 
   void _onAuthProviderChange() {
@@ -71,7 +72,8 @@ class _MapViewState extends State<MapView> {
       }
     }
 
-    locationSubscription = location.onLocationChanged.listen((loc.LocationData currentLocation) {
+    locationSubscription =
+        location.onLocationChanged.listen((loc.LocationData currentLocation) {
       setState(() {
         if (!isLocationCentered) {
           this.currentLocation =
@@ -92,7 +94,7 @@ class _MapViewState extends State<MapView> {
   @override
   Widget build(BuildContext context) {
     LatLng initialCenter = Constants.defaultLocation;
-    double initialZoom = 9.2;
+    double initialZoom = 12.0;
 
     if (currentLocation != null && !isLocationCentered) {
       initialCenter = currentLocation!;
@@ -122,25 +124,37 @@ class _MapViewState extends State<MapView> {
         ),
         MarkerLayer(
           markers: [
+            ...mapEventList
+                .map((mapEvent) => mapEvent.toMarker(context))
+                .toList(),
             if (currentLocation != null)
               Marker(
                 width: 30.0,
                 height: 30.0,
                 point: currentLocation!,
-                child: const Icon(
-                  Icons.circle,
-                  color: Colors.lightBlue,
-                  size: 30.0,
-                ),
+                child: const Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Icon(
+                      Icons.circle,
+                      color: Colors.white,
+                      size: 25.0,
+                    ),
+                    Icon(
+                      Icons.circle,
+                      color: Color(0xFF2233CC),
+                      size: 20.0,
+                    ),
+                  ]
+                )
+                
               ),
-              ...mapEventList
-                .map((mapEvent) => mapEvent.toMarker(context))
-                .toList(),
           ],
         ),
       ],
     );
   }
+
   Future<void> _createEvent(CustomEvent event, BuildContext context) async {
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);

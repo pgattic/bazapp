@@ -42,13 +42,17 @@ class AuthProvider extends ChangeNotifier {
 
       for (var doc in snapshot.docs) {
         Map<String, dynamic> data = doc.data();
+        String eventId = doc.id;
+        final Timestamp timestamp = data['dateTime'];
 
         CustomEvent event = CustomEvent(
           LatLng(data['latitude']?? 0.0, data['longitude']?? 0.0),
-          DateTime.now(),
+          timestamp.toDate(),
           data['title'] ?? '',
           data['description'] ?? '',
           EventType.fromString(data['eventType']??''),
+          eventId,
+          data['userId'],
         );
 
         events.add(event);
