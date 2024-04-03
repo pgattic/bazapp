@@ -24,9 +24,27 @@ enum EventType {
   get mapIcon => Icon(icon, color: color, size: 50);
   get infoScreenIcon => Icon(icon, color: color);
 
+  @override
+  String toString() {
+    return stringName;
+  }
+
   const EventType({
     required this.stringName,
     required this.icon,
     required this.color
   });
+
+  EventType? fromString(String name) {
+    switch (name) {
+      case "Party":
+        return EventType.party;
+      case "Service":
+        return EventType.service;
+      case "Sale":
+        return EventType.sale;
+      default:
+        return null;
+    }
+  }
 }

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:bazapp/data/event/event.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -13,19 +14,20 @@ class AuthProvider extends ChangeNotifier {
 
   User? get user => _user;
 
-  Future<void> addEvent(Event event) async {
+  Future<void> addEvent(CustomEvent event) async {
     try {
       final user = FirebaseAuth.instance.currentUser;
 
       if (user == null) {
         throw Exception('User not logged in');
       }
+      final eventToAdd = event.toDBEvent(userId: user.uid);
 
       // Add event to Firestore
-      await FirebaseFirestore.instance.collection('events').add(event.toMap());
+      await FirebaseFirestore.instance.collection('events').add(eventToAdd.toMap());
 
       // Add event ID to user's eventIds list
-      _user?.eventIds.add(event.eventId);
+      _user?.eventIds.add(eventToAdd.eventId);
       notifyListeners();
     } catch (e) {
       throw e;
@@ -250,9 +252,6 @@ class Event {
   final double latitude;
   final double longitude;
   final String userId;
-  final String color;
-  final String createdFlag;
-  final String followedFlag;
 
   Event({
     required this.eventId,
@@ -263,9 +262,6 @@ class Event {
     required this.latitude,
     required this.longitude,
     required this.userId,
-    required this.color,
-    required this.createdFlag,
-    required this.followedFlag,
   });
 
   // Convert Event to Map for Firestore
@@ -279,9 +275,6 @@ class Event {
       'longitude': longitude,
       'eventType': eventType,
       'userId': userId,
-      'color': color,
-      'createdFlag': createdFlag,
-      'followedFlag': followedFlag
     };
   }
 }

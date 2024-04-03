@@ -2,12 +2,11 @@
 import 'package:bazapp/MessagesScreen.dart';
 import 'package:bazapp/UserProfileScreen.dart';
 import 'package:bazapp/app_colors.dart';
-import 'package:bazapp/calendar_view.dart';
+import 'package:bazapp/planner/planner_view.dart';
 import 'package:bazapp/feed/feed_view.dart';
 import 'package:bazapp/map/map_view.dart';
 import 'package:flutter/material.dart';
 import 'package:bazapp/firebase/auth_provider.dart';
-import 'package:location/location.dart' as loc;
 
 class HomeScreen extends StatefulWidget {
   final User user; // Receive user information
@@ -75,7 +74,7 @@ class _HomeScreenState extends State<HomeScreen> {
       items: const [
         BottomNavigationBarItem(
           icon: Icon(Icons.home),
-          label: 'Home',
+          label: 'Feed',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.map_sharp),

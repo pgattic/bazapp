@@ -45,11 +45,11 @@ class CustomEvent {
 
   String getFormattedStartTime() {
     if (startTime != null) {
-      var hour = startTime!.hour % 12;
+      var hour = (startTime!.hour - 1) % 12 + 1;
       var min = startTime!.minute;
       var minString = min < 10 ? '0$min' : min.toString();
       var sign = startTime!.hour > 11 ? 'pm' : 'am';
-      return '$hour:$minString$sign';
+      return '$hour:$minString $sign';
     } else {
       return '';
     }
@@ -136,7 +136,15 @@ class CustomEvent {
       height: 80,
       child: GestureDetector(
         onTap: () { displayBottomSheet(context); },
-        child: type.mapIcon,
+        child: Column(
+          // centered contents
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            type.mapIcon,
+            Text(getFormattedDate(), style: const TextStyle(fontSize: 12)),
+          ],
+        ),
       ),
       rotate: true,
     );
@@ -185,6 +193,19 @@ class CustomEvent {
         ),
       ),
       onTap: () => displayInfoScreen(context),
+    );
+  }
+
+  Event toDBEvent({userId = '', eventId = ''}) {
+    return Event(
+      eventId: eventId,
+      title: title,
+      dateTime: date,
+      description: description,
+      eventType: type.toString(),
+      latitude: location.latitude,
+      longitude: location.longitude,
+      userId: userId,
     );
   }
 }

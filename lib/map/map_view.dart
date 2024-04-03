@@ -1,5 +1,5 @@
 import 'dart:async';
-
+import 'package:bazapp/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -133,7 +133,7 @@ class _MapViewState extends State<MapView> {
 
   @override
   Widget build(BuildContext context) {
-    LatLng initialCenter = LatLng(51.509364, -0.128928);
+    LatLng initialCenter = Constants.defaultLocation;
     double initialZoom = 9.2;
 
     if (currentLocation != null && !isLocationCentered) {
