@@ -1,8 +1,5 @@
 import 'dart:io';
-
-import 'package:bazapp/ChatScreen.dart';
 import 'package:bazapp/firebase/auth_provider.dart';
-import 'package:bazapp/login_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -95,10 +92,8 @@ class _UserProfilePageState extends State<UserProfileScreen> {
             ElevatedButton(
               onPressed: () {
                 Provider.of<AuthProvider>(context, listen: false).signOut();
-                Navigator.of(context)
-                    .push(MaterialPageRoute(builder: (context) => LoginPage()));
               },
-              child: Text(
+              child: const Text(
                 'Sign Out',
                 style: TextStyle(fontSize: 20, color: Colors.black),
               ),

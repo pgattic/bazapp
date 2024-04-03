@@ -1,3 +1,4 @@
+import 'package:bazapp/constants.dart';
 import 'package:bazapp/data/event/event_type.dart';
 import 'package:bazapp/firebase/auth_provider.dart';
 import 'package:bazapp/map/event_info_screen.dart';
@@ -19,15 +20,15 @@ import 'package:latlong2/latlong.dart';
 
 class CustomEvent {
 
+  String? id;
+  String? userId;
   LatLng location;
-  DateTime date;
-  DateTime? startTime;
-  DateTime? endTime;
+  DateTime dateTime;
   String title;
   String description;
   EventType type;
 
-  CustomEvent(this.location, this.date, this.title, this.description, this.type, [this.startTime, this.endTime]);
+  CustomEvent(this.location, this.dateTime, this.title, this.description, this.type, [this.id, this.userId]);
 
 //  String getFormattedTimeRange() { // Get time in 12-hour format
 //    if (startTime != null && endTime != null) {
@@ -44,38 +45,11 @@ class CustomEvent {
 //  }
 
   String getFormattedStartTime() {
-    if (startTime != null) {
-      var hour = (startTime!.hour - 1) % 12 + 1;
-      var min = startTime!.minute;
-      var minString = min < 10 ? '0$min' : min.toString();
-      var sign = startTime!.hour > 11 ? 'pm' : 'am';
-      return '$hour:$minString $sign';
-    } else {
-      return '';
-    }
+    return Constants.getFormattedTime(dateTime);
   }
 
   String getFormattedDate() {
-    final months = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December',
-    ];
-
-    final day = date.day;
-    final month = months[date.month - 1];
-    final year = date.year;
-
-    return '$month $day, $year';
+    return Constants.getFormattedDate(dateTime);
   }
 
   void displayInfoScreen(BuildContext context) {
@@ -84,7 +58,7 @@ class CustomEvent {
       MaterialPageRoute(
         builder: (BuildContext context) {
           return EventInfoScreen(
-            dateTime: date,
+            dateTime: dateTime,
             title: title,
             description: description,
             type: type,
@@ -153,15 +127,15 @@ class CustomEvent {
   CalendarEventData toCalendarEventData() {
     return CalendarEventData(
       title: title,
-      date: date,
+      date: dateTime,
       description: description,
-      startTime: startTime,
-      endTime: endTime,
+      startTime: dateTime,
+      endTime: dateTime.add(const Duration(hours: 1)), // TODO: Add user-specified duration
     );
   }
 
   Widget toFeedThumbnail(BuildContext context) {
-    var timeTag = startTime == null ? '' : ' at ${getFormattedStartTime()}';
+    var timeTag = ' at ${getFormattedStartTime()}';
     return GestureDetector(
       child: Card(
         child: Column(
@@ -196,11 +170,10 @@ class CustomEvent {
     );
   }
 
-  Event toDBEvent({userId = '', eventId = ''}) {
+  Event toDBEvent({String userId = ''}) {
     return Event(
-      eventId: eventId,
       title: title,
-      dateTime: date,
+      dateTime: dateTime,
       description: description,
       eventType: type.toString(),
       latitude: location.latitude,

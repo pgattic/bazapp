@@ -15,8 +15,6 @@ class FeedScreen extends StatelessWidget {
       "Party",
       "This is a test event",
       EventType.party,
-      DateTime.now(),
-      DateTime.now(),
     ),
     CustomEvent(
       const LatLng(52.509364, -0.128928),

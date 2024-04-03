@@ -1,6 +1,6 @@
-import 'package:bazapp/firebase_options.dart';
+import 'package:bazapp/firebase/firebase_options.dart';
 import 'package:bazapp/home.dart';
-import 'package:bazapp/login_page.dart';
+import 'package:bazapp/login/login_page.dart';
 import 'package:bazapp/planner/planner_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

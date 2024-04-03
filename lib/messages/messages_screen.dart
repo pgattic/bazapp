@@ -1,8 +1,8 @@
-import 'package:bazapp/ChatScreen.dart';
+import 'package:bazapp/messages/chat_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'firebase/auth_provider.dart';
+import '../firebase/auth_provider.dart';
 
 class MessagesScreen extends StatefulWidget {
   final User user; // Accept user information

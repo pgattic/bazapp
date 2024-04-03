@@ -52,33 +52,6 @@ class CalendarScreen extends StatelessWidget {
   }
 }
 
-class DateFormat {
-  static String yMMMMd(DateTime dateTime) {
-    final months = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December'
-    ];
-
-    final day = dateTime.day;
-    final month = months[dateTime.month - 1];
-    final year = dateTime.year;
-    final hour = dateTime.hour;
-    final minute = dateTime.minute;
-
-    return '$month $day, $year at $hour:$minute';
-  }
-}
-
 class LocationProvider extends ChangeNotifier {
   LatLng? _selectedLocation;
 

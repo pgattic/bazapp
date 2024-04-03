@@ -2,7 +2,6 @@ import 'package:bazapp/constants.dart';
 import 'package:bazapp/data/event/event.dart';
 import 'package:bazapp/data/event/event_type.dart';
 import 'package:bazapp/planner/location_selector.dart';
-import 'package:bazapp/planner/planner_view.dart';
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 
@@ -130,7 +129,7 @@ class _CreateEventDialogState extends State<CreateEventDialog> {
               },
               child: const Text('Select Date and Time'),
             ),
-            Text(selectedDateTime == null ? 'None': DateFormat.yMMMMd(selectedDateTime!)),
+            Text(selectedDateTime == null ? 'None': Constants.yMMMMd(selectedDateTime!)),
           ],
         ),
       ),

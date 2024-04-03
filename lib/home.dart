@@ -1,5 +1,5 @@
 
-import 'package:bazapp/MessagesScreen.dart';
+import 'package:bazapp/messages/messages_screen.dart';
 import 'package:bazapp/UserProfileScreen.dart';
 import 'package:bazapp/app_colors.dart';
 import 'package:bazapp/planner/planner_view.dart';

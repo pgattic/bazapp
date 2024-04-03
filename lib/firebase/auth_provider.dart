@@ -27,8 +27,6 @@ class AuthProvider extends ChangeNotifier {
       // Add event to Firestore
       await FirebaseFirestore.instance.collection('events').add(eventToAdd.toMap());
 
-      // Add event ID to user's eventIds list
-      _user?.eventIds.add(eventToAdd.eventId);
       notifyListeners();
     } catch (e) {
       throw e;
@@ -272,7 +270,6 @@ class Message {
 }
 
 class Event {
-  final String eventId;
   final String title;
   final DateTime dateTime;
   final String description;
@@ -282,7 +279,6 @@ class Event {
   final String userId;
 
   Event({
-    required this.eventId,
     required this.title,
     required this.dateTime,
     required this.description,
@@ -295,7 +291,6 @@ class Event {
   // Convert Event to Map for Firestore
   Map<String, dynamic> toMap() {
     return {
-      'eventId': eventId,
       'title': title,
       'dateTime': dateTime,
       'description': description,
@@ -304,32 +299,5 @@ class Event {
       'eventType': eventType,
       'userId': userId,
     };
-  }
-}
-
-class DateFormat {
-  static String yMMMMd(DateTime dateTime) {
-    final months = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December',
-    ];
-
-    final day = dateTime.day;
-    final month = months[dateTime.month - 1];
-    final year = dateTime.year;
-    final hour = dateTime.hour;
-    final minute = dateTime.minute;
-
-    return '$month $day, $year at $hour:$minute';
   }
 }
