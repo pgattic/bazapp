@@ -8,7 +8,7 @@ import 'package:provider/provider.dart';
 
 class FeedScreen extends StatelessWidget {
   
-  List<CustomEvent> feedEventList = [ // TODO: Get events from database, not hardcoded
+  final List<CustomEvent> feedEventList = [ // TODO: Get events from database, not hardcoded
     CustomEvent(
       const LatLng(51.509364, -0.128928),
       DateTime.now(),
@@ -64,7 +64,7 @@ class FeedScreen extends StatelessWidget {
               children: [
                 Text(
                   'Welcome to the feed, ${user?.displayName ?? 'Guest'}!',
-                  style: TextStyle(fontSize: 20),
+                  style: const TextStyle(fontSize: 20),
                 ),
                 Column(
                   children: feedEventList

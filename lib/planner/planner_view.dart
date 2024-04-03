@@ -37,7 +37,6 @@ class CalendarScreen extends StatelessWidget {
   }
 
   Future<void> _createEvent(CustomEvent event, BuildContext context) async {
-
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       // Add event to Firebase

@@ -2,10 +2,16 @@ import 'package:bazapp/constants.dart';
 import 'package:bazapp/data/event/event.dart';
 import 'package:bazapp/data/event/event_type.dart';
 import 'package:bazapp/planner/location_selector.dart';
+import 'package:bazapp/planner/planner_view.dart';
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 
 class CreateEventDialog extends StatefulWidget {
+  final LatLng? selectedLocation;
+  final DateTime? selectedDateTime;
+
+  const CreateEventDialog({super.key, this.selectedLocation, this.selectedDateTime});
+
   @override
   State<CreateEventDialog> createState() => _CreateEventDialogState();
 }
@@ -13,15 +19,23 @@ class CreateEventDialog extends StatefulWidget {
 class _CreateEventDialogState extends State<CreateEventDialog> {
   String title = '';
   String description = '';
-  EventType? selectedEventType;
+  EventType selectedEventType = EventType.other;
   LatLng? selectedLocation;
   DateTime? selectedDateTime;
   bool isFormComplete = false;
 
   @override
+  void initState() {
+    super.initState();
+    selectedLocation = widget.selectedLocation;
+    selectedDateTime = widget.selectedDateTime;
+    checkFormCompletion();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Create Event'),
+      title: const Text('Create Event'),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -47,10 +61,11 @@ class _CreateEventDialogState extends State<CreateEventDialog> {
             ),
             Row(
               children: [
-                Text('Type: '),
+                const Text('Type: '),
                 DropdownButton<EventType>(
                   value: selectedEventType,
                   onChanged: (EventType? newValue) {
+                    if (newValue == null) return;
                     setState(() {
                       selectedEventType = newValue;
                       checkFormCompletion();
@@ -62,7 +77,7 @@ class _CreateEventDialogState extends State<CreateEventDialog> {
                       child: Row(
                         children: [
                           Icon(type.icon), // Display icon next to the option
-                          SizedBox(width: 10),
+                          const SizedBox(width: 10),
                           Text(type.stringName),
                         ],
                       ),
@@ -81,11 +96,12 @@ class _CreateEventDialogState extends State<CreateEventDialog> {
                           selectedLocation ?? Constants.defaultLocation,
                     );
                   },
-                );
+                )?? selectedLocation;
                 checkFormCompletion();
               },
-              child: Text('Select Location'),
+              child: const Text('Select Location'),
             ),
+            Text(selectedLocation == null ? 'None': '${selectedLocation!.latitude}, ${selectedLocation!.longitude}'),
             ElevatedButton(
               onPressed: () async {
                 // Show date time picker and get selected date time
@@ -114,6 +130,7 @@ class _CreateEventDialogState extends State<CreateEventDialog> {
               },
               child: const Text('Select Date and Time'),
             ),
+            Text(selectedDateTime == null ? 'None': DateFormat.yMMMMd(selectedDateTime!)),
           ],
         ),
       ),
@@ -125,16 +142,16 @@ class _CreateEventDialogState extends State<CreateEventDialog> {
           },
         ),
         TextButton(
-          child: const Text('Create'),
           onPressed: isFormComplete
               ? () {
                   Navigator.pop(
                     context,
                     CustomEvent(selectedLocation!, selectedDateTime!, title,
-                        description, selectedEventType!),
+                        description, selectedEventType),
                   );
                 }
               : null,
+          child: const Text('Create'),
         ),
       ],
     );
@@ -144,7 +161,6 @@ class _CreateEventDialogState extends State<CreateEventDialog> {
     setState(() {
       isFormComplete = title.isNotEmpty &&
           description.isNotEmpty &&
-          selectedEventType != null &&
           selectedLocation != null &&
           selectedDateTime != null;
     });

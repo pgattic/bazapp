@@ -28,44 +28,50 @@ class _LocationSelectorState extends State<LocationSelector> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text('Select Location'),
-      content: SizedBox(
-        width: 300,
-        height: 300,
-        child: FlutterMap(
-          options: MapOptions(
-            initialCenter: result,
-            initialZoom: 13.0,
-            maxZoom: 20,
-            onPositionChanged: (position, _) {
-              var ctr = position.center;
-              if (ctr != null) {
-                setState(() {
-                  result = ctr;
-                });
-              }
-            },
-          ),
-          children: [
-            TileLayer(
-              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-              userAgentPackageName: 'com.example.app',
-            ),
-            MarkerLayer(
-              markers: [
-                Marker(
-                  width: 30.0,
-                  height: 30.0,
-                  point: result,
-                  child: const Icon(
-                    Icons.circle,
-                    color: Colors.red,
-                    size: 30.0,
-                  ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            width: 300,
+            height: 300,
+            child: FlutterMap(
+              options: MapOptions(
+                initialCenter: result,
+                initialZoom: 13.0,
+                maxZoom: 20,
+                onPositionChanged: (position, _) {
+                  var ctr = position.center;
+                  if (ctr != null) {
+                    setState(() {
+                      result = ctr;
+                    });
+                  }
+                },
+              ),
+              children: [
+                TileLayer(
+                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                  userAgentPackageName: 'com.example.app',
+                ),
+                MarkerLayer(
+                  markers: [
+                    Marker(
+                      width: 30.0,
+                      height: 30.0,
+                      point: result,
+                      child: const Icon(
+                        Icons.circle,
+                        color: Colors.red,
+                        size: 30.0,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
-          ],
-        ),
+          ),
+          const Text("Move the map to select a location."),
+        ],
       ),
       actions: [
         TextButton(

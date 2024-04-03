@@ -1,9 +1,10 @@
 import 'dart:io';
-
 import 'package:bazapp/data/event/event.dart';
+import 'package:bazapp/data/event/event_type.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
@@ -29,6 +30,33 @@ class AuthProvider extends ChangeNotifier {
       // Add event ID to user's eventIds list
       _user?.eventIds.add(eventToAdd.eventId);
       notifyListeners();
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  Future<List<CustomEvent>> getAllEvents() async {
+    try {
+      QuerySnapshot<Map<String, dynamic>> snapshot =
+          await _firestore.collection('events').get();
+
+      List<CustomEvent> events = [];
+
+      for (var doc in snapshot.docs) {
+        Map<String, dynamic> data = doc.data();
+
+        CustomEvent event = CustomEvent(
+          LatLng(data['latitude']?? 0.0, data['longitude']?? 0.0),
+          DateTime.now(),
+          data['title'] ?? '',
+          data['description'] ?? '',
+          EventType.fromString(data['eventType']??''),
+        );
+
+        events.add(event);
+      }
+
+      return events;
     } catch (e) {
       throw e;
     }
@@ -277,11 +305,6 @@ class Event {
       'userId': userId,
     };
   }
-}
-
-String _formatDateTime(DateTime dateTime) {
-  final formattedDate = DateFormat.yMMMMd(dateTime);
-  return formattedDate;
 }
 
 class DateFormat {

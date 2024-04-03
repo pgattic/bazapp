@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'package:bazapp/constants.dart';
+import 'package:bazapp/firebase/auth_provider.dart';
+import 'package:bazapp/planner/create_event_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:location/location.dart' as loc;
 import 'package:bazapp/data/event/event.dart';
-import 'package:bazapp/data/event/event_type.dart';
+import 'package:provider/provider.dart';
 
 class MapView extends StatefulWidget {
   MapView({Key? key}) : super(key: key);
@@ -20,12 +22,33 @@ class _MapViewState extends State<MapView> {
   bool isLocationCentered = false;
   late loc.Location location;
   late StreamSubscription<loc.LocationData> locationSubscription;
+  List<CustomEvent> mapEventList = [];
 
   @override
   void initState() {
     super.initState();
     location = loc.Location();
     _getLocation();
+    _fetchEvents();
+
+    // Listen for changes in AuthProvider
+    Provider.of<AuthProvider>(context, listen: false).addListener(_onAuthProviderChange);
+  }
+
+  void _onAuthProviderChange() {
+    _fetchEvents();
+  }
+
+  void _fetchEvents() async {
+    try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      List<CustomEvent> events = await authProvider.getAllEvents();
+      setState(() {
+        mapEventList = events;
+      });
+    } catch (e) {
+      print('Error fetching events: $e');
+    }
   }
 
   void _getLocation() async {
@@ -60,75 +83,11 @@ class _MapViewState extends State<MapView> {
     });
   }
 
-  void _showMapPopup(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        final RenderBox box = context.findRenderObject() as RenderBox;
-        return MapPopup(
-          onLocationSelected: (LatLng latLng) {
-            Navigator.pop(context, latLng);
-          },
-          renderBox: box,
-          mapController: mapController,
-          details: LongPressStartDetails(
-            globalPosition: box.size.center(Offset.zero),
-          ),
-        );
-      },
-    ).then((value) {
-      if (value != null && value is LatLng) {
-        print('Selected location: ${value.latitude}, ${value.longitude}');
-      }
-    });
-  }
-
-  List<CustomEvent> mapEventList = [
-    CustomEvent(
-      const LatLng(51.509364, -0.128928),
-      DateTime.now(),
-      "Party",
-      "This is a test event",
-      EventType.party,
-    ),
-    CustomEvent(
-      const LatLng(52.509364, -0.128928),
-      DateTime.now(),
-      "Service",
-      "This is a test event",
-      EventType.service,
-    ),
-    CustomEvent(
-      const LatLng(53.509364, -0.128928),
-      DateTime.now(),
-      "Sale",
-      "This is a test event",
-      EventType.sale,
-    ),
-    CustomEvent(
-      const LatLng(54.509364, -0.128928),
-      DateTime.now(),
-      "Buy my stuff",
-      "This is a test event",
-      EventType.sale,
-    ),
-    CustomEvent(
-      const LatLng(55.509364, -0.128928),
-      DateTime.now(),
-      "this is epic",
-      "poggers",
-      EventType.service,
-    )
-  ];
-
-  void addEvent(CustomEvent event) {
-    mapEventList.add(event);
-  }
-
   @override
   void dispose() {
     super.dispose();
     locationSubscription.cancel();
+    Provider.of<AuthProvider>(context, listen: false).removeListener(_onAuthProviderChange);
   }
 
   @override
@@ -146,8 +105,14 @@ class _MapViewState extends State<MapView> {
         initialCenter: initialCenter,
         initialZoom: initialZoom,
         maxZoom: 20,
-        onLongPress: (tapPos, point) {
-          print('Long press at: ${point.latitude}, ${point.longitude}');
+        onLongPress: (tapPos, point) async {
+          final eventToUpload = await showDialog<CustomEvent>(
+              context: context,
+              builder: (BuildContext context) {
+                return CreateEventDialog(selectedLocation: point);
+              });
+          if (eventToUpload == null) return;
+          _createEvent(eventToUpload, context);
         },
       ),
       mapController: mapController,
@@ -177,41 +142,18 @@ class _MapViewState extends State<MapView> {
       ],
     );
   }
-}
-
-class MapPopup extends StatelessWidget {
-  final Function(LatLng) onLocationSelected;
-  final RenderBox renderBox;
-  final MapController mapController;
-
-  const MapPopup({
-    Key? key,
-    required this.onLocationSelected,
-    required this.renderBox,
-    required this.mapController,
-    required LongPressStartDetails details,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onLongPressStart: (LongPressStartDetails details) {
-        final Offset localPosition =
-            renderBox.globalToLocal(details.globalPosition);
-        final LatLngBounds? bounds = mapController.bounds;
-        final double height =
-            bounds!.northEast.latitude - bounds.southWest.latitude;
-        final double width =
-            bounds.northEast.longitude - bounds.southWest.longitude;
-        final LatLng latLng = LatLng(
-          bounds.northEast.latitude -
-              height * localPosition.dy / MediaQuery.of(context).size.height,
-          bounds.southWest.longitude +
-              width * localPosition.dx / MediaQuery.of(context).size.width,
-        );
-        onLocationSelected(latLng);
-      },
-      child: Container(),
-    );
+  Future<void> _createEvent(CustomEvent event, BuildContext context) async {
+    try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      // Add event to Firebase
+      await authProvider.addEvent(event);
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Event created successfully'),
+      ));
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Failed to create event: $e'),
+      ));
+    }
   }
 }

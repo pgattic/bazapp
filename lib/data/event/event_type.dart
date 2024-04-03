@@ -15,6 +15,11 @@ enum EventType {
     stringName: "Sale",
     icon: Icons.monetization_on,
     color: Colors.green
+  ),
+  other(
+    stringName: "Other",
+    icon: Icons.question_mark,
+    color: Colors.grey,
   );
 
   final String stringName;
@@ -35,7 +40,7 @@ enum EventType {
     required this.color
   });
 
-  EventType? fromString(String name) {
+  static EventType fromString(String name) {
     switch (name) {
       case "Party":
         return EventType.party;
@@ -44,7 +49,7 @@ enum EventType {
       case "Sale":
         return EventType.sale;
       default:
-        return null;
+        return EventType.other;
     }
   }
 }
