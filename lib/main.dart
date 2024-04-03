@@ -1,7 +1,6 @@
 import 'package:bazapp/firebase/firebase_options.dart';
 import 'package:bazapp/home.dart';
 import 'package:bazapp/login/login_page.dart';
-import 'package:bazapp/planner/planner_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:bazapp/firebase/auth_provider.dart';
@@ -16,7 +15,6 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => AuthProvider()),
-        ChangeNotifierProvider(create: (context) => LocationProvider()), 
       ],
       child: const MyApp(),
     ),

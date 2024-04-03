@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 
 /*
@@ -10,6 +11,7 @@ import 'package:latlong2/latlong.dart';
 
 class Constants {
   static const LatLng defaultLocation = LatLng(43.8231759,-111.7924097); // Rexburg, Idaho!
+  static const TextStyle defaultTextStyle = TextStyle(fontSize: 16);
 
   static String getFormattedTime(DateTime dateTime) {
     var hour = (dateTime.hour - 1) % 12 + 1;

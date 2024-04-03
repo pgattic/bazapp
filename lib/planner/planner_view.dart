@@ -3,7 +3,6 @@ import 'package:bazapp/planner/create_event_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:calendar_view/calendar_view.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
 import 'package:bazapp/firebase/auth_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -49,16 +48,5 @@ class CalendarScreen extends StatelessWidget {
         content: Text('Failed to create event: $e'),
       ));
     }
-  }
-}
-
-class LocationProvider extends ChangeNotifier {
-  LatLng? _selectedLocation;
-
-  LatLng? get selectedLocation => _selectedLocation;
-
-  void setSelectedLocation(LatLng location) {
-    _selectedLocation = location;
-    notifyListeners();
   }
 }

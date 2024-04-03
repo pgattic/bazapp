@@ -1,3 +1,4 @@
+import 'package:bazapp/user_profile/user_profile_small.dart';
 import 'package:bazapp/messages/chat_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -131,32 +132,23 @@ class _MessagesScreenState extends State<MessagesScreen> {
       if (!uniqueUserIds.contains(otherUserId)) {
         uniqueUserIds.add(otherUserId);
 
-        final otherUserDoc = await FirebaseFirestore.instance
-            .collection('users')
-            .doc(otherUserId)
-            .get();
-        final otherUserDisplayName = otherUserDoc['displayName'];
-
         chatButtons.add(
-          Card(
-            margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          TextButton(
             child: ListTile(
-              title: Text(
-                otherUserDisplayName,
-                style: TextStyle(fontSize: 16),
-                selectionColor: Colors.black, // Customize the text style
-              ),
-              onTap: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => ChatScreen(recipientUid: otherUserId),
-                ));
-              },
+              title: UserProfileSmall(userId: otherUserId),
             ),
+            onPressed: () {
+              Navigator.of(context).push(MaterialPageRoute(
+                builder: (context) => ChatScreen(recipientUid: otherUserId),
+              ));
+            },
           ),
         );
       }
     }
-    setState(() {}); // Trigger a rebuild to display the chat buttons.
+    if (mounted) {
+      setState(() {}); // Trigger a rebuild to display the chat buttons.
+    }
   }
 
   @override

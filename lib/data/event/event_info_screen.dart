@@ -1,5 +1,6 @@
+import 'package:bazapp/constants.dart';
 import 'package:bazapp/data/event/event.dart';
-import 'package:bazapp/data/event/user_profile_small.dart';
+import 'package:bazapp/user_profile/user_profile_small.dart';
 import 'package:bazapp/messages/chat_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -24,7 +25,7 @@ class EventInfoScreen extends StatelessWidget {
           children: [
             Text(
               event.title,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
               ),
@@ -32,32 +33,23 @@ class EventInfoScreen extends StatelessWidget {
             SizedBox(height: 16),
             Text(
               event.description,
-              style: TextStyle(
-                fontSize: 16,
-              ),
+              style: Constants.defaultTextStyle,
             ),
             SizedBox(height: 16),
             Text(
               'Date: ${event.getFormattedDateWithYear()}',
-              style: TextStyle(
-                fontSize: 16,
-              ),
+              style: Constants.defaultTextStyle,
             ),
             SizedBox(height: 16),
             Text(
               'Time: ${event.getFormattedStartTime()}',
-              style: TextStyle(
-                fontSize: 16,
-              ),
+              style: Constants.defaultTextStyle,
             ),
             SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: Text('Close'),
-            ),
+            Text("Created by:"),
+            SizedBox(height: 8),
             UserProfileSmall(userId: event.userId!),
+            SizedBox(height: 8),
             if (event.userId != user?.uid) ElevatedButton(
               onPressed: () => {
                 Navigator.of(context).push(MaterialPageRoute(
@@ -65,7 +57,7 @@ class EventInfoScreen extends StatelessWidget {
                 ))
               },
               child: const Text('Chat'),
-            ) else Text("(you)"),
+            ),
           ],
         ),
       ),

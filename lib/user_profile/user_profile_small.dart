@@ -28,25 +28,29 @@ class UserProfileSmall extends StatelessWidget {
         final String email = userData['email'];
         final String iconUrl = userData['icon'];
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        return Row(
           children: [
             CircleAvatar(
               backgroundImage: NetworkImage(iconUrl),
               radius: 20,
             ),
-            SizedBox(height: 8),
-            Text(
-              displayName,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Text(
-              email,
-              style: TextStyle(
-                color: Colors.grey,
-              ),
+            SizedBox(width: 8),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  displayName,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  email,
+                  style: TextStyle(
+                    color: Colors.grey,
+                  ),
+                ),
+              ],
             ),
           ],
         );
