@@ -1,10 +1,15 @@
 import 'package:bazapp/data/event/event.dart';
+import 'package:bazapp/data/event/user_profile_small.dart';
+import 'package:bazapp/messages/chat_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class EventInfoScreen extends StatelessWidget {
   final CustomEvent event;
 
-  const EventInfoScreen({Key? key, required this.event}) : super(key: key);
+  EventInfoScreen({Key? key, required this.event}) : super(key: key);
+
+  final user = FirebaseAuth.instance.currentUser;
 
   @override
   Widget build(BuildContext context) {
@@ -52,6 +57,15 @@ class EventInfoScreen extends StatelessWidget {
               },
               child: Text('Close'),
             ),
+            UserProfileSmall(userId: event.userId!),
+            if (event.userId != user?.uid) ElevatedButton(
+              onPressed: () => {
+                Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => ChatScreen(recipientUid: event.userId!),
+                ))
+              },
+              child: const Text('Chat'),
+            ) else Text("(you)"),
           ],
         ),
       ),
