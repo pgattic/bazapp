@@ -1,7 +1,8 @@
 import 'package:bazapp/constants.dart';
+import 'package:bazapp/data/event/event_bottom_sheet.dart';
 import 'package:bazapp/data/event/event_type.dart';
 import 'package:bazapp/firebase/auth_provider.dart';
-import 'package:bazapp/map/event_info_screen.dart';
+import 'package:bazapp/data/event/event_info_screen.dart';
 import 'package:calendar_view/calendar_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -31,20 +32,6 @@ class CustomEvent {
       this.location, this.dateTime, this.title, this.description, this.type,
       [this.id, this.userId]);
 
-//  String getFormattedTimeRange() { // Get time in 12-hour format
-//    if (startTime != null && endTime != null) {
-//      var sHour = startTime!.hour % 12;
-//      var sMin = startTime!.minute;
-//      var sSign = startTime!.hour > 11 ? 'pm' : 'am';
-//      var eHour = endTime!.hour % 12;
-//      var eMin = endTime!.minute;
-//      var eSign = endTime!.hour > 11 ? 'pm' : 'am';
-//      return '$sHour:$sMin${sSign==eSign?"":sSign} - $eHour:$eMin$eSign';
-//    } else {
-//      return '';
-//    }
-//  }
-
   String getFormattedStartTime() {
     return Constants.getFormattedTime(dateTime);
   }
@@ -57,14 +44,16 @@ class CustomEvent {
     return Constants.getFormattedDate(dateTime);
   }
 
+  String getMMMMd() {
+    return Constants.MMMMd(dateTime);
+  }
+
   void displayInfoScreen(BuildContext context) {
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (BuildContext context) {
-          return EventInfoScreen(
-            event: this,
-          );
+          return EventInfoScreen(event: this);
         },
       ),
     );
@@ -74,62 +63,7 @@ class CustomEvent {
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
-        return Container(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                children: [
-                  type.infoScreenIcon,
-                  const SizedBox(width: 8),
-                  const Text(
-                    'Event Details',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Text(
-                title,
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                description,
-                style: const TextStyle(fontSize: 16),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                Constants.yMMMMd(dateTime),
-                style: const TextStyle(fontSize: 16),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      displayInfoScreen(context);
-                    },
-                    child: const Text('More Info'),
-                  ),
-                  const SizedBox(width: 16),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: const Text('Close'),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        );
+        return EventBottomSheet(event: this);
       },
     );
   }
@@ -195,7 +129,6 @@ class CustomEvent {
   }
 
   Widget toFeedThumbnail(BuildContext context) {
-    var timeTag = ' at ${getFormattedStartTime()}';
     return GestureDetector(
       child: Card(
         child: Column(
@@ -203,12 +136,12 @@ class CustomEvent {
           children: <Widget>[
             ListTile(
               leading: type.infoScreenIcon,
-              title: Text(title),
+              title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(description),
-                  Text("${getFormattedDate()}$timeTag")
+                  Text(getMMMMd())
                 ],
               ),
             ),

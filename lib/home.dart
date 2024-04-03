@@ -45,14 +45,13 @@ class _HomeScreenState extends State<HomeScreen> {
       case 0:
         return FeedScreen(); // Pass the user to FeedScreen
       case 1:
-        return MapView();
-      //return MapView(user: widget.user); // Pass the user to MapView
+        return CalendarScreen(); // Pass the user to CalendarScreen
       case 2:
+        return MapView();
+      case 3:
         return MessagesScreen(
           user: widget.user
         ); // Pass the user to MessagesScreen
-      case 3:
-        return CalendarScreen(); // Pass the user to CalendarScreen
       case 4:
         return UserProfileScreen(); // Pass the user to UserProfileScreen
       default:
@@ -77,16 +76,16 @@ class _HomeScreenState extends State<HomeScreen> {
           label: 'Feed',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.map_sharp),
+          icon: Icon(Icons.calendar_today),
+          label: 'Calendar',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.map),
           label: 'Map',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.message),
           label: 'Messages',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.calendar_today),
-          label: 'Calendar',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.person),

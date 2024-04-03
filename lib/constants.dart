@@ -48,4 +48,22 @@ class Constants {
   static String yMMMMd(DateTime dateTime) {
     return "${getFormattedDateWithYear(dateTime)} at ${getFormattedTime(dateTime)}";
   }
+  
+  static String MMMMd(DateTime dateTime) {
+    return "${getFormattedDate(dateTime)} at ${getFormattedTime(dateTime)}";
+  }
+
+//  String getFormattedTimeRange() { // Get time in 12-hour format
+//    if (startTime != null && endTime != null) {
+//      var sHour = startTime!.hour % 12;
+//      var sMin = startTime!.minute;
+//      var sSign = startTime!.hour > 11 ? 'pm' : 'am';
+//      var eHour = endTime!.hour % 12;
+//      var eMin = endTime!.minute;
+//      var eSign = endTime!.hour > 11 ? 'pm' : 'am';
+//      return '$sHour:$sMin${sSign==eSign?"":sSign} - $eHour:$eMin$eSign';
+//    } else {
+//      return '';
+//    }
+//  }
 }
