@@ -87,7 +87,6 @@ class _MapViewState extends State<MapView> {
   void dispose() {
     super.dispose();
     locationSubscription.cancel();
-    Provider.of<AuthProvider>(context, listen: false).removeListener(_onAuthProviderChange);
   }
 
   @override
@@ -130,7 +129,7 @@ class _MapViewState extends State<MapView> {
                 point: currentLocation!,
                 child: const Icon(
                   Icons.circle,
-                  color: Colors.blue,
+                  color: Colors.lightBlue,
                   size: 30.0,
                 ),
               ),
