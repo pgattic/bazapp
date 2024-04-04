@@ -21,17 +21,30 @@ class SignUpPage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // Your logo here
-            Image.asset(
-              'assets/images/logo.png',
-              width: 150,
-              height: 150,
-            ),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(40.0), // Adjust the radius as needed
+                  child: Image.asset(
+                    'images/logo.png',
+                    width: 150,
+                    height: 150,
+                  ),
+              ),
             const SizedBox(height: 16),
             const Text(
               'Sign Up',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
+            TextFormField(
+              controller: displayNameController,
+              decoration: InputDecoration(
+                labelText: 'Display Name',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
             TextFormField(
               controller: emailController,
               decoration: InputDecoration(
@@ -47,16 +60,6 @@ class SignUpPage extends StatelessWidget {
               obscureText: true,
               decoration: InputDecoration(
                 labelText: 'Password',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextFormField(
-              controller: displayNameController,
-              decoration: InputDecoration(
-                labelText: 'Display Name',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
@@ -91,6 +94,7 @@ class SignUpPage extends StatelessWidget {
               },
               child: const Text('Sign Up'),
             ),
+            const SizedBox(height: 16),
             TextButton(
               onPressed: () {
                 // Navigate to the login page

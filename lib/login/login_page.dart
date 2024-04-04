@@ -28,11 +28,14 @@ class _LoginPageState extends State<LoginPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              // Image.asset(
-              //   'assets/images/logo.png',
-              //   width: 150, // Adjust the size as needed
-              //   height: 150, // Adjust the size as needed
-              // ),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(40.0), // Adjust the radius as needed
+                  child: Image.asset(
+                    'images/logo.png',
+                    width: 150,
+                    height: 150,
+                  ),
+              ),
               const SizedBox(height: 16),
               const Text(
                 'Login',
