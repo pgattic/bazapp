@@ -320,10 +320,26 @@ class _ChatScreenState extends State<ChatScreen> {
             child: Row(
               children: [
                 Expanded(
-                  child: TextField(
-                    controller: _messageController,
-                    decoration: InputDecoration(
-                      hintText: 'Type a message',
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(maxHeight: 100),
+                    child: TextField(
+                      textInputAction: TextInputAction.send,
+                      maxLines: null, // Limit to 5 lines
+                      scrollPhysics: BouncingScrollPhysics(),
+                      controller: _messageController,
+                      decoration: InputDecoration(
+                        hintText: 'Type a message',
+                      ),
+                      onSubmitted: (text) {
+                        if (text.isNotEmpty) {
+                          _sendMessage(text);
+                          _messageController.clear();
+                        }
+                      },
+                      onTap: () async {
+                        await Future.delayed(const Duration(milliseconds: 400));
+                        _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+                      },
                     ),
                   ),
                 ),
