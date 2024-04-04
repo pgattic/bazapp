@@ -176,6 +176,7 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
+  late ScrollController _scrollController;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final TextEditingController _messageController = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -190,6 +191,7 @@ class _ChatScreenState extends State<ChatScreen> {
   void initState() {
     super.initState();
     final user = _auth.currentUser;
+    _scrollController = ScrollController();
     if (user != null) {
       final currentUserUid = user.uid;
       chatId = currentUserUid.hashCode <= widget.recipientUid.hashCode
@@ -200,6 +202,7 @@ class _ChatScreenState extends State<ChatScreen> {
       _messagesStream = _firestore
           .collection('messages')
           .where('chatId', isEqualTo: chatId)
+          .orderBy('timestamp', descending: false)
           .snapshots()
           .listen((snapshot) {
         snapshot.docChanges.forEach((change) {
@@ -213,6 +216,9 @@ class _ChatScreenState extends State<ChatScreen> {
             _showNotification(message?['text'] as String);
           }
         });
+        WidgetsBinding.instance.addPostFrameCallback((_) { // Scroll to the bottom of the conversation on ever update and at the beginning
+          _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+        });
       });
     }
   }
@@ -222,6 +228,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   void dispose() {
+    _scrollController.dispose();
     _messagesStream.cancel(); // Cancel the stream subscription
     super.dispose();
   }
@@ -270,29 +277,37 @@ class _ChatScreenState extends State<ChatScreen> {
         children: [
           Expanded(
             child: ListView.builder(
+              controller: _scrollController,
               itemCount: _chatMessages.length,
               itemBuilder: (context, index) {
                 final message = _chatMessages[index];
                 final isCurrentUser =
                     message['senderId'] == _auth.currentUser!.uid;
-                final bubbleColor =
-                    isCurrentUser ? Colors.green : Colors.blue;
+                final [bubbleColor, textColor] =
+                  isCurrentUser ? [
+                    Colors.blue,
+                    Colors.white,
+                  ] : [
+                    const Color(0xFFDDDDDD),
+                    Colors.black,
+                  ];
+                final padding = isCurrentUser ? const EdgeInsets.fromLTRB(72.0, 1.0, 8.0, 1.0) : const EdgeInsets.fromLTRB(8.0, 1.0, 72.0, 1.0);
 
                 return Align(
                   alignment: isCurrentUser
                       ? Alignment.centerRight
                       : Alignment.centerLeft,
                   child: Padding(
-                    padding: EdgeInsets.all(8.0),
+                    padding: padding,
                     child: Container(
                       decoration: BoxDecoration(
                         color: bubbleColor,
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(20),
                       ),
-                      padding: EdgeInsets.all(8.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
                       child: Text(
                         message['text'] as String,
-                        style: TextStyle(color: Colors.white),
+                        style: TextStyle(fontSize: 16, color: textColor),
                       ),
                     ),
                   ),
