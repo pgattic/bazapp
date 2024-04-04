@@ -53,7 +53,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
             final CalendarEventData<CustomEvent> calEvent = CalendarEventData(
                 date: event.dateTime,
                 startTime: event.dateTime,
-                endTime: event.dateTime.add(const Duration(hours: 1)),
+                endTime: event.dateTime.add(const Duration(hours: 3)),
                 title: event.title,
                 description: event.description,
                 color: event.type.color,
