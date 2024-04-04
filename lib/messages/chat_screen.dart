@@ -214,29 +214,27 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Future<void> _initializeChatMessages() async {
-    final messages = await _messageService.getChatMessages(chatId!).first;
+  final messagesStream = _messageService.getChatMessages(chatId!);
 
-    if (messages.docs.isEmpty) {
-      // Handle the case when there are no messages in the chat.
-      // You can show a message or handle it according to your app's requirements.
-      print('No messages in this chat.' + chatId!);
-
-    } else {
-      _chatMessages = messages.docs.map((message) {
+  // Listen to the stream of chat messages
+  messagesStream.listen((messagesSnapshot) {
+    if (messagesSnapshot.docs.isNotEmpty) {
+      _chatMessages.clear(); // Clear existing messages before adding new ones
+      _chatMessages.addAll(messagesSnapshot.docs.map((message) {
         return Message(
             senderId: message['senderId'],
             recipientId: message['recipientId'],
             text: message['text'],
             timestamp: message['timestamp'].toDate(),
-            read: false);
-      }).toList();
+            read: message['read']);
+      }).toList());
 
       // Reverse the messages list to display the most recent messages at the bottom
       _chatMessages = _chatMessages.reversed.toList();
       setState(() {});
     }
-  }
-
+  });
+}
   @override
   void dispose() {
     _chatRefreshTimer.cancel();
