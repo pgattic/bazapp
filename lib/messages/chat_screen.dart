@@ -29,7 +29,7 @@ class MessageService {
         'recipientId': message.recipientId,
         'text': message.text,
         'timestamp': message.timestamp,
-        'chatId': chatId,
+        'chatId': chatId = _generateChatId(message.senderId, message.recipientId),
         'read': false,
       });
     } catch (e) {
@@ -91,11 +91,15 @@ class MessageService {
     }
   }
 
-  String _generateChatId(String? userId1, String? userId2) {
-    List<String?> userIds = [userId1, userId2];
-    userIds.sort();
-    return userIds.join('_');
-  }
+String _generateChatId(String? userId1, String? userId2) {
+  // Sort user IDs alphabetically
+  List<String?> userIds = [userId1, userId2];
+  userIds.sort();
+
+  // Concatenate sorted user IDs to generate chat ID
+  return '${userIds[0]}_${userIds[1]}';
+}
+
 
   Future<void> markAsRead(String messageId) async {
     await _firestore.collection('messages').doc(messageId).update({
