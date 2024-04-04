@@ -2,12 +2,45 @@ import 'package:bazapp/data/event/event.dart';
 import 'package:bazapp/data/event/create_event_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:calendar_view/calendar_view.dart';
-import 'package:flutter_map/flutter_map.dart';
 import 'package:bazapp/firebase/auth_provider.dart';
 import 'package:provider/provider.dart';
 
-class CalendarScreen extends StatelessWidget {
-  final mapController = MapController();
+class CalendarScreen extends StatefulWidget {
+  const CalendarScreen({super.key});
+
+  @override
+  State<CalendarScreen> createState() => _CalendarScreenState();
+}
+
+class _CalendarScreenState extends State<CalendarScreen> {
+
+  List<CustomEvent> feedEventList = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchEvents();
+
+    // Listen for changes in AuthProvider
+    Provider.of<AuthProvider>(context, listen: false)
+        .addListener(_onAuthProviderChange);
+  }
+
+  void _onAuthProviderChange() {
+    _fetchEvents();
+  }
+
+  void _fetchEvents() async {
+    try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      List<CustomEvent> events = await authProvider.getUserEvents();
+      setState(() {
+        feedEventList = events;
+      });
+    } catch (e) {
+      print('Error fetching events: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +49,24 @@ class CalendarScreen extends StatelessWidget {
       child: Scaffold(
         body: Builder(
           builder: (BuildContext context) {
-            return const DayView();
+            for (final event in feedEventList) {
+            final CalendarEventData<CustomEvent> calEvent = CalendarEventData(
+                date: event.dateTime,
+                startTime: event.dateTime,
+                endTime: event.dateTime.add(const Duration(hours: 1)),
+                title: event.title,
+                description: event.description,
+                color: event.type.color,
+                event: event,
+            );
+            CalendarControllerProvider.of(context).controller.add(calEvent);
+          }
+            return DayView(
+              onEventTap: (events, date) {
+                final CustomEvent event = events[0].event as CustomEvent;
+                event.displayBottomSheet(context);
+              }
+            );
           },
         ),
         floatingActionButton: FloatingActionButton(
@@ -25,7 +75,7 @@ class CalendarScreen extends StatelessWidget {
             final eventToUpload = await showDialog<CustomEvent>(
                 context: context,
                 builder: (BuildContext context) {
-                  return CreateEventDialog();
+                  return CreateEventDialog(selectedDateTime: DateTime.now());
                 });
             if (eventToUpload == null) return;
             _createEvent(eventToUpload, context);

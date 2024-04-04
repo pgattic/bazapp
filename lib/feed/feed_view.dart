@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 
 class FeedScreen extends StatefulWidget {
 
-  FeedScreen({super.key});
+  const FeedScreen({super.key});
 
   @override
   State<FeedScreen> createState() => _FeedScreenState();
