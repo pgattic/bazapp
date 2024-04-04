@@ -12,6 +12,7 @@ class UserProfileScreen extends StatefulWidget {
 }
 
 class _UserProfilePageState extends State<UserProfileScreen> {
+  
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   Future<void> _changeProfilePicture(AuthProvider authProvider) async {
@@ -50,6 +51,7 @@ class _UserProfilePageState extends State<UserProfileScreen> {
 
   Future<File> compressImage(File imageFile) async {
     // Compress the image using flutter_image_compress
+    
     List<int> compressedBytes = await FlutterImageCompress.compressWithList(
       imageFile.readAsBytesSync(),
       minHeight: 1920,
@@ -64,71 +66,111 @@ class _UserProfilePageState extends State<UserProfileScreen> {
     return compressedImage;
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final authProvider = Provider.of<AuthProvider>(context);
-    final user = authProvider.user;
+  Future<String?> getURLByUserID(String displayName) async {
+  try {
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .where('displayName', isEqualTo: displayName)
+        .limit(1)
+        .get();
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('User Profile'),
-      ),
-      body: Center(
-        child: Column(
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: GestureDetector(
-                onTap: () {
-                  // Handle tapping the profile picture to change it
-                  _changeProfilePicture(authProvider);
-                },
-                child: CircleAvatar(
-                  radius: 60,
-                  backgroundImage: NetworkImage(user?.icon ?? ''),
-                ),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Provider.of<AuthProvider>(context, listen: false).signOut();
-              },
-              child: const Text(
-                'Sign Out',
-                style: TextStyle(fontSize: 20, color: Colors.black),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                padding: EdgeInsets.all(10),
-                child: Text(
-                  'Display Name: ${user?.displayName ?? 'Loading...'}',
-                  style: TextStyle(fontSize: 20),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                padding: EdgeInsets.all(10),
-                child: Text(
-                  'Email: ${user?.email ?? 'Loading...'}',
-                  style: TextStyle(fontSize: 20),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+    if (querySnapshot.docs.isNotEmpty) {
+      // Assuming the field containing the URL is named 'profileUrl'
+      final url = querySnapshot.docs.first.get('icon') as String?;
+      return url;
+    } else {
+      return null;
+    }
+  } catch (e) {
+    print('Error getting URL by UID: $e');
+    return null;
   }
+}
+
+
+ @override
+Widget build(BuildContext context) {
+  final authProvider = Provider.of<AuthProvider>(context);
+  final user = authProvider.user;
+
+  return FutureBuilder<String?>(
+    future: getURLByUserID(user!.displayName),
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        // Show a loading indicator while fetching the URL
+        return CircularProgressIndicator();
+      } else if (snapshot.hasError) {
+        // Show an error message if fetching the URL fails
+        return Text('Error: ${snapshot.error}');
+      } else {
+        // Once the URL is fetched successfully, use it to display the profile picture
+        final url = snapshot.data ?? ''; // Use empty string if URL is null
+        return Scaffold(
+          appBar: AppBar(
+            title: Text('User Profile'),
+          ),
+          body: Center(
+            child: Column(
+              children: <Widget>[
+                Padding(
+  padding: const EdgeInsets.all(16.0),
+  child: GestureDetector(
+    onTap: () {
+      // Handle tapping the profile picture to change it
+      _changeProfilePicture(authProvider);
+    },
+    child: ClipOval(
+      child: CircleAvatar(
+        radius: 60,
+        backgroundImage: url.isEmpty ? null : NetworkImage(url),
+        backgroundColor: Colors.grey, // Use a default background color
+      ),
+    ),
+  ),
+),
+                ElevatedButton(
+                  onPressed: () {
+                    Provider.of<AuthProvider>(context, listen: false).signOut();
+                  },
+                  child: const Text(
+                    'Sign Out',
+                    style: TextStyle(fontSize: 20, color: Colors.black),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    padding: EdgeInsets.all(10),
+                    child: Text(
+                      'Display Name: ${user.displayName ?? 'Loading...'}',
+                      style: TextStyle(fontSize: 20),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    padding: EdgeInsets.all(10),
+                    child: Text(
+                      'Email: ${user.email ?? 'Loading...'}',
+                      style: TextStyle(fontSize: 20),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+    },
+  );
+}
 }
