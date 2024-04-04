@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class Message {
   final String senderId;
@@ -175,14 +176,15 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  final MessageService _messageService = MessageService();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final TextEditingController _messageController = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
 
   String? chatId;
-  List<Message> _chatMessages = [];
-  late Timer _chatRefreshTimer;
-  String recipientDisplayName = '';
+  List<Map<String, dynamic>> _chatMessages = [];
+  late StreamSubscription<QuerySnapshot<Map<String, dynamic>>> _messagesStream;
 
   @override
   void initState() {
@@ -193,93 +195,88 @@ class _ChatScreenState extends State<ChatScreen> {
       chatId = currentUserUid.hashCode <= widget.recipientUid.hashCode
           ? '$currentUserUid${widget.recipientUid}'
           : '${widget.recipientUid}$currentUserUid';
-      _fetchRecipientDisplayName();
-      _initializeChatMessages();
-      _chatRefreshTimer = Timer.periodic(Duration(seconds: 5), (timer) {
-        _initializeChatMessages();
+
+      // Start listening for new messages
+      _messagesStream = _firestore
+          .collection('messages')
+          .where('chatId', isEqualTo: chatId)
+          .snapshots()
+          .listen((snapshot) {
+        snapshot.docChanges.forEach((change) {
+          if (change.type == DocumentChangeType.added) {
+            final message = change.doc.data();
+            // Add the message to the list
+            setState(() {
+              _chatMessages.add(message!);
+            });
+            // Trigger a notification for the new message
+            _showNotification(message?['text'] as String);
+          }
+        });
       });
     }
   }
 
-  Future<void> _fetchRecipientDisplayName() async {
-    final recipientUid = widget.recipientUid;
-    final recipientUser = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(recipientUid)
-        .get();
-    final displayName = recipientUser['displayName'];
-    setState(() {
-      recipientDisplayName = displayName;
-    });
-  }
 
-  Future<void> _initializeChatMessages() async {
-  final messagesStream = _messageService.getChatMessages(chatId!);
 
-  // Listen to the stream of chat messages
-  messagesStream.listen((messagesSnapshot) {
-    if (messagesSnapshot.docs.isNotEmpty) {
-      _chatMessages.clear(); // Clear existing messages before adding new ones
-      _chatMessages.addAll(messagesSnapshot.docs.map((message) {
-        return Message(
-            senderId: message['senderId'],
-            recipientId: message['recipientId'],
-            text: message['text'],
-            timestamp: message['timestamp'].toDate(),
-            read: message['read']);
-      }).toList());
 
-      // Reverse the messages list to display the most recent messages at the bottom
-      _chatMessages = _chatMessages.reversed.toList();
-      setState(() {});
-    }
-  });
-}
   @override
   void dispose() {
-    _chatRefreshTimer.cancel();
+    _messagesStream.cancel(); // Cancel the stream subscription
     super.dispose();
+  }
+
+  void _showNotification(String message) async {
+    const AndroidNotificationDetails androidPlatformChannelSpecifics =
+        AndroidNotificationDetails(
+      'your channel id',
+      'your channel name',
+      importance: Importance.max,
+      priority: Priority.high,
+    );
+    const NotificationDetails platformChannelSpecifics =
+        NotificationDetails(android: androidPlatformChannelSpecifics);
+    await flutterLocalNotificationsPlugin.show(
+      0,
+      'New Message',
+      message,
+      platformChannelSpecifics,
+      payload: 'item x',
+    );
+  }
+
+  Future<void> _sendMessage(String text) async {
+    try {
+      await _firestore.collection('messages').add({
+        'senderId': _auth.currentUser!.uid,
+        'recipientId': widget.recipientUid,
+        'text': text,
+        'timestamp': DateTime.now(),
+        'chatId': chatId,
+        'read': false,
+      });
+    } catch (e) {
+      print('Error sending message: $e');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final user = _auth.currentUser;
-    if (user == null) {
-      return Scaffold(
-        body: Center(
-          child: Text('You must be logged in to use this feature.'),
-        ),
-      );
-    }
-
-    final currentUserUid = user.uid;
-
-    // Check if the current user's UID is the same as the recipient's UID
-    if (currentUserUid == widget.recipientUid) {
-      return Scaffold(
-        appBar: AppBar(
-          title: Text('Chat Error'),
-        ),
-        body: Center(
-          child: Text('You cannot chat with yourself.'),
-        ),
-      );
-    }
-
     return Scaffold(
       appBar: AppBar(
-        title: Text('Chat with $recipientDisplayName'),
+        title: Text('Chat Screen'),
       ),
       body: Column(
         children: [
           Expanded(
             child: ListView.builder(
-              reverse: true,
               itemCount: _chatMessages.length,
               itemBuilder: (context, index) {
                 final message = _chatMessages[index];
-                final isCurrentUser = message.senderId == currentUserUid;
-                final bubbleColor = isCurrentUser ? Colors.green : Colors.blue;
+                final isCurrentUser =
+                    message['senderId'] == _auth.currentUser!.uid;
+                final bubbleColor =
+                    isCurrentUser ? Colors.green : Colors.blue;
 
                 return Align(
                   alignment: isCurrentUser
@@ -294,7 +291,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       ),
                       padding: EdgeInsets.all(8.0),
                       child: Text(
-                        message.text,
+                        message['text'] as String,
                         style: TextStyle(color: Colors.white),
                       ),
                     ),
@@ -319,13 +316,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   onPressed: () {
                     final text = _messageController.text.trim();
                     if (text.isNotEmpty) {
-                      final message = Message(
-                          senderId: currentUserUid,
-                          recipientId: widget.recipientUid,
-                          text: text,
-                          timestamp: DateTime.now(),
-                          read: false);
-                      _messageService.sendMessage(message, chatId!);
+                      _sendMessage(text);
                       _messageController.clear();
                     }
                   },

@@ -1,16 +1,15 @@
-import 'package:bazapp/firebase/firebase_options.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'package:provider/provider.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:bazapp/firebase/auth_provider.dart';
 import 'package:bazapp/home.dart';
 import 'package:bazapp/login/login_page.dart';
-import 'package:provider/provider.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await Firebase.initializeApp();
 
   // Initialize the flutter_local_notifications plugin
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
