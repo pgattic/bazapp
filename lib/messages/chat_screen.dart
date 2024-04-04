@@ -40,7 +40,7 @@ class MessageService {
   Stream<QuerySnapshot> getChatMessages(String chatId) {
     return _firestore
         .collection('messages')
-        .where('chatId', isEqualTo: chatId)
+        .where('senderId', isEqualTo: chatId)
         .orderBy('timestamp', descending: false)
         .snapshots();
   }
@@ -97,7 +97,7 @@ String _generateChatId(String? userId1, String? userId2) {
   userIds.sort();
 
   // Concatenate sorted user IDs to generate chat ID
-  return '${userIds[0]}_${userIds[1]}';
+  return '${userIds[0]}${userIds[1]}';
 }
 
 
@@ -191,8 +191,8 @@ class _ChatScreenState extends State<ChatScreen> {
     if (user != null) {
       final currentUserUid = user.uid;
       chatId = currentUserUid.hashCode <= widget.recipientUid.hashCode
-          ? '$currentUserUid-${widget.recipientUid}'
-          : '${widget.recipientUid}-$currentUserUid';
+          ? '$currentUserUid${widget.recipientUid}'
+          : '${widget.recipientUid}$currentUserUid';
       _fetchRecipientDisplayName();
       _initializeChatMessages();
       _chatRefreshTimer = Timer.periodic(Duration(seconds: 5), (timer) {
