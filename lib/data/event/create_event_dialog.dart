@@ -1,7 +1,8 @@
 import 'package:bazapp/constants.dart';
 import 'package:bazapp/data/event/event.dart';
 import 'package:bazapp/data/event/event_type.dart';
-import 'package:bazapp/planner/location_selector.dart';
+import 'package:bazapp/map/location_selector.dart';
+import 'package:bazapp/map/map_view_mini.dart';
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 
@@ -51,6 +52,7 @@ class _CreateEventDialogState extends State<CreateEventDialog> {
             ),
             TextField(
               decoration: InputDecoration(labelText: 'Description'),
+              maxLines: null,
               onChanged: (value) {
                 setState(() {
                   description = value;
@@ -100,7 +102,7 @@ class _CreateEventDialogState extends State<CreateEventDialog> {
               },
               child: const Text('Select Location'),
             ),
-            Text(selectedLocation == null ? 'None': '${selectedLocation!.latitude}, ${selectedLocation!.longitude}'),
+            if (selectedLocation != null) MapViewMini(selectedLocation!, height: 150),
             ElevatedButton(
               onPressed: () async {
                 // Show date time picker and get selected date time

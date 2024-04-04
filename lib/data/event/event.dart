@@ -32,22 +32,6 @@ class CustomEvent {
       this.location, this.dateTime, this.title, this.description, this.type,
       [this.id, this.userId]);
 
-  String getFormattedStartTime() {
-    return Constants.getFormattedTime(dateTime);
-  }
-
-  String getFormattedDateWithYear() {
-    return Constants.getFormattedDateWithYear(dateTime);
-  }
-
-  String getFormattedDate() {
-    return Constants.getFormattedDate(dateTime);
-  }
-
-  String getMMMMd() {
-    return Constants.MMMMd(dateTime);
-  }
-
   void displayInfoScreen(BuildContext context) {
     Navigator.push(
       context,
@@ -102,7 +86,7 @@ class CustomEvent {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  getFormattedDate(),
+                  Constants.getComfyDate(dateTime),
                   style: const TextStyle(
                     fontSize: 12,
                     color: Colors.white,
@@ -141,7 +125,7 @@ class CustomEvent {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(description),
-                  Text(getMMMMd())
+                  Text(Constants.getComfyDateTime(dateTime))
                 ],
               ),
             ),

@@ -1,5 +1,5 @@
 import 'package:bazapp/data/event/event.dart';
-import 'package:bazapp/planner/create_event_dialog.dart';
+import 'package:bazapp/data/event/create_event_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:calendar_view/calendar_view.dart';
 import 'package:flutter_map/flutter_map.dart';

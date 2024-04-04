@@ -1,5 +1,6 @@
 import 'package:bazapp/constants.dart';
 import 'package:bazapp/data/event/event.dart';
+import 'package:bazapp/map/map_view_mini.dart';
 import 'package:bazapp/user_profile/user_profile_small.dart';
 import 'package:bazapp/messages/chat_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -37,14 +38,11 @@ class EventInfoScreen extends StatelessWidget {
             ),
             SizedBox(height: 16),
             Text(
-              'Date: ${event.getFormattedDateWithYear()}',
+              Constants.yMMMMd(event.dateTime),
               style: Constants.defaultTextStyle,
             ),
-            SizedBox(height: 16),
-            Text(
-              'Time: ${event.getFormattedStartTime()}',
-              style: Constants.defaultTextStyle,
-            ),
+            SizedBox(height: 8),
+            MapViewMini(event.location),
             SizedBox(height: 16),
             Text("Created by:"),
             SizedBox(height: 8),

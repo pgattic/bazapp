@@ -1,52 +1,45 @@
 
 import 'package:bazapp/data/event/event.dart';
-import 'package:bazapp/data/event/event_type.dart';
 import 'package:bazapp/firebase/auth_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 
-class FeedScreen extends StatelessWidget {
-  
-  final List<CustomEvent> feedEventList = [ // TODO: Get events from database, not hardcoded
-    CustomEvent(
-      const LatLng(51.509364, -0.128928),
-      DateTime.now(),
-      "Party",
-      "This is a test event",
-      EventType.party,
-    ),
-    CustomEvent(
-      const LatLng(52.509364, -0.128928),
-      DateTime.now(),
-      "Service",
-      "This is a test event",
-      EventType.service,
-    ),
-    CustomEvent(
-      const LatLng(53.509364, -0.128928),
-      DateTime.now(),
-      "Sale",
-      "This is a test event",
-      EventType.sale,
-    ),
-    CustomEvent(
-      const LatLng(54.509364, -0.128928),
-      DateTime.now(),
-      "Buy my stuff",
-      "This is a test event",
-      EventType.sale,
-    ),
-    CustomEvent(
-      const LatLng(55.509364, -0.128928),
-      DateTime.now(),
-      "this is epic",
-      "poggers",
-      EventType.service,
-    )
-  ];
+class FeedScreen extends StatefulWidget {
 
   FeedScreen({super.key});
+
+  @override
+  State<FeedScreen> createState() => _FeedScreenState();
+}
+
+class _FeedScreenState extends State<FeedScreen> {
+  List<CustomEvent> feedEventList = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchEvents();
+
+    // Listen for changes in AuthProvider
+    Provider.of<AuthProvider>(context, listen: false)
+        .addListener(_onAuthProviderChange);
+  }
+
+  void _onAuthProviderChange() {
+    _fetchEvents();
+  }
+
+  void _fetchEvents() async {
+    try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      List<CustomEvent> events = await authProvider.getUserEvents();
+      setState(() {
+        feedEventList = events;
+      });
+    } catch (e) {
+      print('Error fetching events: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

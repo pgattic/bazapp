@@ -43,6 +43,28 @@ class Constants {
     return '$month $day';
   }
 
+  static String getShortDate(DateTime dateTime) {
+    final months = [
+      'Jan.',
+      'Feb.',
+      'Mar.',
+      'Apr.',
+      'May',
+      'Jun.',
+      'Jul.',
+      'Aug.',
+      'Sept.',
+      'Oct.',
+      'Nov.',
+      'Dec.',
+    ];
+
+    final day = dateTime.day;
+    final month = months[dateTime.month - 1];
+
+    return '$month $day';
+  }
+
   static String getFormattedDateWithYear(DateTime dateTime) {
     return '${getFormattedDate(dateTime)} ${dateTime.year}';
   }
@@ -53,6 +75,24 @@ class Constants {
   
   static String MMMMd(DateTime dateTime) {
     return "${getFormattedDate(dateTime)} at ${getFormattedTime(dateTime)}";
+  }
+
+  static String getComfyDate(DateTime dateTime) {
+    if (dateTime.year == DateTime.now().year) {
+      if (dateTime.day == DateTime.now().day) {
+        return 'Today';
+      } else if (dateTime.add(const Duration(days: 1)).day == DateTime.now().day) {
+        return 'Yesterday';
+      } else if (dateTime.subtract(const Duration(days: 1)).day == DateTime.now().day) {
+        return 'Tomorrow';
+      }
+      return getShortDate(dateTime);
+    }
+    return '${getShortDate(dateTime)} ${dateTime.year}';
+  }
+
+  static String getComfyDateTime(DateTime dateTime) {
+    return "${getComfyDate(dateTime)} at ${getFormattedTime(dateTime)}";
   }
 
 //  String getFormattedTimeRange() { // Get time in 12-hour format

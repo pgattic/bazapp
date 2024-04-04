@@ -64,6 +64,41 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  Future<List<CustomEvent>> getUserEvents() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        throw Exception('User not logged in');
+      }
+      QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
+          .collection('events')
+          .where('userId', isEqualTo: user.uid)
+          .get();
+
+      List<CustomEvent> events = [];
+
+      for (var doc in snapshot.docs) {
+        Map<String, dynamic> data = doc.data();
+        String eventId = doc.id;
+        final Timestamp timestamp = data['dateTime'];
+
+        CustomEvent event = CustomEvent(
+          LatLng(data['latitude']?? 0.0, data['longitude']?? 0.0),
+          timestamp.toDate(),
+          data['title'] ?? '',
+          data['description'] ?? '',
+          EventType.fromString(data['eventType']??''),
+          eventId,
+          data['userId'],
+        );
+        events.add(event);
+      }
+      return events;
+    } catch (e) {
+      throw e;
+    }
+  }
+
   // Sign-up function
   // Updated signUp function
   Future<void> signUp(
