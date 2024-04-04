@@ -50,22 +50,24 @@ class _CalendarScreenState extends State<CalendarScreen> {
         body: Builder(
           builder: (BuildContext context) {
             for (final event in feedEventList) {
-            final CalendarEventData<CustomEvent> calEvent = CalendarEventData(
-                date: event.dateTime,
-                startTime: event.dateTime,
-                endTime: event.dateTime.add(const Duration(hours: 3)),
-                title: event.title,
-                description: event.description,
-                color: event.type.color,
-                event: event,
-            );
-            CalendarControllerProvider.of(context).controller.add(calEvent);
-          }
+              final CalendarEventData<CustomEvent> calEvent = CalendarEventData(
+                  date: event.dateTime,
+                  startTime: event.dateTime,
+                  endTime: event.dateTime.add(const Duration(hours: 3)),
+                  title: event.title,
+                  description: event.description,
+                  color: event.type.color,
+                  event: event,
+              );
+              CalendarControllerProvider.of(context).controller.add(calEvent);
+            }
             return DayView(
               onEventTap: (events, date) {
                 final CustomEvent event = events[0].event as CustomEvent;
                 event.displayBottomSheet(context);
-              }
+              },
+              heightPerMinute: 1,
+              startHour: 5,
             );
           },
         ),

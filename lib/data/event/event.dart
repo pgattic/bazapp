@@ -1,4 +1,4 @@
-import 'package:bazapp/constants.dart';
+import 'package:bazapp/time_functions.dart';
 import 'package:bazapp/data/event/event_bottom_sheet.dart';
 import 'package:bazapp/data/event/event_type.dart';
 import 'package:bazapp/firebase/auth_provider.dart';
@@ -78,7 +78,7 @@ class CustomEvent {
               size: 30,
             ),
             Positioned(
-              bottom: 0,
+              bottom: 2,
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 8),
                 decoration: BoxDecoration(
@@ -86,7 +86,7 @@ class CustomEvent {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  Constants.getComfyDate(dateTime),
+                  TimeFunctions.getComfyDate(dateTime),
                   style: const TextStyle(
                     fontSize: 12,
                     color: Colors.white,
@@ -125,7 +125,7 @@ class CustomEvent {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(description),
-                  Text(Constants.getComfyDateTime(dateTime))
+                  Text(TimeFunctions.getComfyDateTime(dateTime))
                 ],
               ),
             ),

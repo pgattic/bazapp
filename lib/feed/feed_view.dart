@@ -57,11 +57,17 @@ class _FeedScreenState extends State<FeedScreen> {
                   'Welcome to the feed, ${user?.displayName ?? 'Guest'}!',
                   style: const TextStyle(fontSize: 20),
                 ),
-                Column(
+                const SizedBox(height: 8),
+                if (feedEventList.isNotEmpty) Column(
                   children: feedEventList
                         .map((mapEvent) => mapEvent.toFeedThumbnail(context))
                         .toList(),
-                )
+                ) else const Column(
+                  children: [
+                    Text('No events to display'),
+                    Text('Try adding some!'),
+                  ],
+                ),
                 // Add your feed content here
               ],
             )],

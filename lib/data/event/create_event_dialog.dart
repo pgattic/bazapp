@@ -1,4 +1,5 @@
 import 'package:bazapp/constants.dart';
+import 'package:bazapp/time_functions.dart';
 import 'package:bazapp/data/event/event.dart';
 import 'package:bazapp/data/event/event_type.dart';
 import 'package:bazapp/map/location_selector.dart';
@@ -131,7 +132,7 @@ class _CreateEventDialogState extends State<CreateEventDialog> {
               },
               child: const Text('Select Date and Time'),
             ),
-            Text(selectedDateTime == null ? 'None': Constants.yMMMMd(selectedDateTime!)),
+            Text(selectedDateTime == null ? 'None': TimeFunctions.yMMMMd(selectedDateTime!)),
           ],
         ),
       ),

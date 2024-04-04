@@ -27,7 +27,7 @@ enum EventType {
   final Color color;
 
   get mapIcon => Icon(icon, color: color, size: 50);
-  get infoScreenIcon => Icon(icon, color: color);
+  get infoScreenIcon => Icon(icon, color: color, size: 32);
 
   @override
   String toString() {

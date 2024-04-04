@@ -28,6 +28,7 @@ class _MapViewState extends State<MapView> {
   void initState() {
     super.initState();
     location = loc.Location();
+    locationSubscription = _createLocationStreamSubscription();
     _getLocation();
     _fetchEvents();
 
@@ -50,6 +51,20 @@ class _MapViewState extends State<MapView> {
     } catch (e) {
       print('Error fetching events: $e');
     }
+  }
+
+  StreamSubscription<loc.LocationData> _createLocationStreamSubscription() { // TODO: Figure out what this is and why it fixes the runtime exceptions
+    final streamController = StreamController<loc.LocationData>();
+    return streamController.stream.listen((loc.LocationData currentLocation) {
+      setState(() {
+        if (!isLocationCentered) {
+          this.currentLocation =
+              LatLng(currentLocation.latitude!, currentLocation.longitude!);
+          mapController.move(this.currentLocation!, 15.0);
+          isLocationCentered = true;
+        }
+      });
+    });
   }
 
   void _getLocation() async {
@@ -145,9 +160,8 @@ class _MapViewState extends State<MapView> {
                       color: Color(0xFF2233CC),
                       size: 20.0,
                     ),
-                  ]
-                )
-                
+                  ],
+                ),
               ),
           ],
         ),

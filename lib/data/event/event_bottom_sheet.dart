@@ -1,4 +1,4 @@
-import 'package:bazapp/constants.dart';
+import 'package:bazapp/time_functions.dart';
 import 'package:bazapp/data/event/event.dart';
 import 'package:flutter/material.dart';
 
@@ -39,7 +39,7 @@ class EventBottomSheet extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            Constants.yMMMMd(event.dateTime),
+            TimeFunctions.yMMMMd(event.dateTime),
             style: const TextStyle(fontSize: 16),
           ),
           const SizedBox(height: 8),

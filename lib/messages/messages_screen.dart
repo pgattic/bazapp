@@ -134,14 +134,24 @@ class _MessagesScreenState extends State<MessagesScreen> {
 
         chatButtons.add(
           TextButton(
-            child: ListTile(
-              title: UserProfileSmall(userId: otherUserId),
-            ),
             onPressed: () {
               Navigator.of(context).push(MaterialPageRoute(
                 builder: (context) => ChatScreen(recipientUid: otherUserId),
               ));
             },
+            style: ButtonStyle(
+              shape: MaterialStateProperty.all(
+                RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(0.0), // Set radius to 0.0 for no rounded corners
+                ),
+              ),
+              padding: MaterialStateProperty.all(
+                const EdgeInsets.symmetric(vertical: 4.0, horizontal: 0.0), // Adjust the padding values as needed
+              ),
+            ),
+            child: ListTile(
+              title: UserProfileSmall(userId: otherUserId),
+            ),
           ),
         );
       }

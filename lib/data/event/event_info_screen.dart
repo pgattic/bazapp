@@ -1,6 +1,7 @@
 import 'package:bazapp/constants.dart';
 import 'package:bazapp/data/event/event.dart';
 import 'package:bazapp/map/map_view_mini.dart';
+import 'package:bazapp/time_functions.dart';
 import 'package:bazapp/user_profile/user_profile_small.dart';
 import 'package:bazapp/messages/chat_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -24,12 +25,18 @@ class EventInfoScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              event.title,
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
+            Row(
+              children: [
+                event.type.infoScreenIcon,
+                SizedBox(width:8),
+                Text(
+                  event.title,
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
             ),
             SizedBox(height: 16),
             Text(
@@ -38,7 +45,7 @@ class EventInfoScreen extends StatelessWidget {
             ),
             SizedBox(height: 16),
             Text(
-              Constants.yMMMMd(event.dateTime),
+              TimeFunctions.yMMMMd(event.dateTime),
               style: Constants.defaultTextStyle,
             ),
             SizedBox(height: 8),
@@ -48,13 +55,22 @@ class EventInfoScreen extends StatelessWidget {
             SizedBox(height: 8),
             UserProfileSmall(userId: event.userId!),
             SizedBox(height: 8),
-            if (event.userId != user?.uid) ElevatedButton(
-              onPressed: () => {
-                Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => ChatScreen(recipientUid: event.userId!),
-                ))
-              },
-              child: const Text('Chat'),
+            if (event.userId != user?.uid) Row(
+              children: [
+                ElevatedButton(
+                  onPressed: () => {
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => ChatScreen(recipientUid: event.userId!),
+                    ))
+                  },
+                  child: const Text('Chat'),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed: ()=>{},
+                  child: const Text("Subscribe to Event"),
+                )
+              ],
             ),
           ],
         ),
