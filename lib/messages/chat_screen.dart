@@ -37,13 +37,13 @@ class MessageService {
     }
   }
 
-  Stream<QuerySnapshot> getChatMessages(String chatId) {
-    return _firestore
-        .collection('messages')
-        .where('senderId', isEqualTo: chatId)
-        .orderBy('timestamp', descending: false)
-        .snapshots();
-  }
+Stream<QuerySnapshot> getChatMessages(String chatId) {
+  return _firestore
+      .collection('messages')
+      .where('chatId', isEqualTo: chatId) // Query messages by chatId
+      .orderBy('timestamp', descending: false)
+      .snapshots();
+}
 
   String? getCurrentUserId() {
     final user = FirebaseAuth.instance.currentUser;
@@ -219,7 +219,8 @@ class _ChatScreenState extends State<ChatScreen> {
     if (messages.docs.isEmpty) {
       // Handle the case when there are no messages in the chat.
       // You can show a message or handle it according to your app's requirements.
-      print('No messages in this chat.');
+      print('No messages in this chat.' + chatId!);
+
     } else {
       _chatMessages = messages.docs.map((message) {
         return Message(
