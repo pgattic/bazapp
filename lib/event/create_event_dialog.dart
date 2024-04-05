@@ -1,7 +1,7 @@
 import 'package:bazapp/constants.dart';
 import 'package:bazapp/time_functions.dart';
-import 'package:bazapp/data/event/event.dart';
-import 'package:bazapp/data/event/event_type.dart';
+import 'package:bazapp/event/event.dart';
+import 'package:bazapp/event/event_type.dart';
 import 'package:bazapp/map/location_selector.dart';
 import 'package:bazapp/map/map_view_mini.dart';
 import 'package:flutter/material.dart';

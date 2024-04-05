@@ -1,6 +1,6 @@
 import 'dart:io';
-import 'package:bazapp/data/event/event.dart';
-import 'package:bazapp/data/event/event_type.dart';
+import 'package:bazapp/event/event.dart';
+import 'package:bazapp/event/event_type.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -319,7 +319,7 @@ class BZAuthProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> unsubscribeToEvent(String userId, String eventId) async {
+  Future<void> unsubscribeFromEvent(String userId, String eventId) async {
     try {
       final user = FirebaseAuth.instance.currentUser;
 
@@ -450,6 +450,24 @@ class BZAuthProvider extends ChangeNotifier {
           .get();
 
       return snapshot.size;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<bool?> getEventSubscriptionStatus(String userId, String eventId) async {
+    try {
+      QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
+          .collection('event-subscriptions')
+          .where("user-id", isEqualTo: userId)
+          .where("event-id", isEqualTo: eventId)
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        return true;
+      } else {
+        return false;
+      }
     } catch (e) {
       return null;
     }

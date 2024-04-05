@@ -1,8 +1,8 @@
 import 'package:bazapp/time_functions.dart';
-import 'package:bazapp/data/event/event_bottom_sheet.dart';
-import 'package:bazapp/data/event/event_type.dart';
+import 'package:bazapp/event/event_bottom_sheet.dart';
+import 'package:bazapp/event/event_type.dart';
 import 'package:bazapp/firebase/auth_provider.dart';
-import 'package:bazapp/data/event/event_info_screen.dart';
+import 'package:bazapp/event/event_info_screen.dart';
 import 'package:calendar_view/calendar_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';

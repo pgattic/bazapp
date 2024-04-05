@@ -46,7 +46,7 @@ class UserProfileSmall extends StatelessWidget {
                       displayName,
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    if (viewerId == userId) const Text(' (you)', style: TextStyle(color: Colors.grey)),
+                    if (viewerId == userId) const Text(' (you)'),
                   ],
                 ),
                 Text(

@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'package:bazapp/constants.dart';
 import 'package:bazapp/firebase/auth_provider.dart';
-import 'package:bazapp/data/event/create_event_dialog.dart';
+import 'package:bazapp/event/create_event_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:location/location.dart' as loc;
-import 'package:bazapp/data/event/event.dart';
+import 'package:bazapp/event/event.dart';
 import 'package:provider/provider.dart';
 
 class MapView extends StatefulWidget {

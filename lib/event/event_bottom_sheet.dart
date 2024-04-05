@@ -1,5 +1,5 @@
 import 'package:bazapp/time_functions.dart';
-import 'package:bazapp/data/event/event.dart';
+import 'package:bazapp/event/event.dart';
 import 'package:flutter/material.dart';
 
 class EventBottomSheet extends StatelessWidget {

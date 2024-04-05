@@ -1,5 +1,5 @@
-import 'package:bazapp/data/event/event.dart';
-import 'package:bazapp/data/event/create_event_dialog.dart';
+import 'package:bazapp/event/event.dart';
+import 'package:bazapp/event/create_event_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:calendar_view/calendar_view.dart';
 import 'package:bazapp/firebase/auth_provider.dart';

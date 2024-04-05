@@ -1,5 +1,5 @@
 
-import 'package:bazapp/data/event/event.dart';
+import 'package:bazapp/event/event.dart';
 import 'package:bazapp/firebase/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
