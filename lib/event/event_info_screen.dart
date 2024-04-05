@@ -1,14 +1,11 @@
 import 'package:bazapp/constants.dart';
-import 'package:bazapp/event/event_bottom_sheet.dart';
 import 'package:bazapp/event/subscription_dialog.dart';
-import 'package:bazapp/firebase/auth_provider.dart';
 import 'package:bazapp/event/event.dart';
 import 'package:bazapp/map/map_view_mini.dart';
 import 'package:bazapp/time_functions.dart';
 import 'package:bazapp/user_profile/user_profile_small.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class EventInfoScreen extends StatelessWidget {
   final CustomEvent event;

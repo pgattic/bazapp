@@ -16,6 +16,11 @@ enum EventType {
     icon: Icons.monetization_on,
     color: Colors.green
   ),
+  trip(
+    stringName: "Trip",
+    icon: Icons.directions_car,
+    color: Colors.purple
+  ),
   other(
     stringName: "Other",
     icon: Icons.question_mark,

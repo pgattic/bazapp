@@ -65,13 +65,16 @@ class _EventSubscriptionDialogState extends State<EventSubscriptionDialog> {
         if (widget.viewerId != null && widget.viewerId != widget.event.userId) Row(
           children:
           [
-            if (subscribed == null) const Text("Loading..."),
+            if (subscribed == null) const ElevatedButton(
+              onPressed: null,
+              child: Text("Loading..."),
+            ),
             if (subscribed == true) FilledButton(
-              onPressed: () => {_unsubscribeFromEvent(context)},
+              onPressed: () {_unsubscribeFromEvent(context); setState((){subscribed = null;});},
               child: const Text("Unsubscribe"), 
             ),
             if (subscribed == false) ElevatedButton(
-              onPressed: () => {_subscribeToEvent(context)},
+              onPressed: () {_subscribeToEvent(context); setState((){subscribed = null;});},
               child: const Text("Subscribe"),
             ),
             SizedBox(width: 8),
