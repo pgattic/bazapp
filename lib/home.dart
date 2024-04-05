@@ -1,6 +1,6 @@
 
 import 'package:bazapp/messages/messages_screen.dart';
-import 'package:bazapp/UserProfileScreen.dart';
+import 'package:bazapp/user_profile/user_profile_screen.dart';
 import 'package:bazapp/app_colors.dart';
 import 'package:bazapp/planner/planner_view.dart';
 import 'package:bazapp/feed/feed_view.dart';
@@ -28,6 +28,9 @@ class _HomeScreenState extends State<HomeScreen> {
           IconButton(
             icon: Icon(Icons.person),
             onPressed: () {
+              setState(() {
+                _currentIndex = 4;
+              });
               // Handle user profile action
               // You can navigate to a profile screen or show user details here
               // Access user information using widget.user
@@ -43,9 +46,9 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildContent() {
     switch (_currentIndex) {
       case 0:
-        return FeedScreen(); // Pass the user to FeedScreen
+        return const FeedScreen(); // Pass the user to FeedScreen
       case 1:
-        return CalendarScreen(); // Pass the user to CalendarScreen
+        return const CalendarScreen(); // Pass the user to CalendarScreen
       case 2:
         return MapView();
       case 3:

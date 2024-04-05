@@ -4,6 +4,7 @@ import 'package:bazapp/data/event/event_type.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -16,90 +17,6 @@ class AuthProvider extends ChangeNotifier {
   User? get user => _user;
   Future<String?> getuser() async{
     return FirebaseAuth.instance.currentUser?.uid;
-  }
-
-  Future<void> addEvent(CustomEvent event) async {
-    try {
-      final user = FirebaseAuth.instance.currentUser;
-
-      if (user == null) {
-        throw Exception('User not logged in');
-      }
-      final eventToAdd = event.toDBEvent(userId: user.uid);
-
-      // Add event to Firestore
-      await FirebaseFirestore.instance.collection('events').add(eventToAdd.toMap());
-
-      notifyListeners();
-    } catch (e) {
-      throw e;
-    }
-  }
-
-  Future<List<CustomEvent>> getAllEvents() async {
-    try {
-      QuerySnapshot<Map<String, dynamic>> snapshot =
-          await _firestore.collection('events').get();
-
-      List<CustomEvent> events = [];
-
-      for (var doc in snapshot.docs) {
-        Map<String, dynamic> data = doc.data();
-        String eventId = doc.id;
-        final Timestamp timestamp = data['dateTime'];
-
-        CustomEvent event = CustomEvent(
-          LatLng(data['latitude']?? 0.0, data['longitude']?? 0.0),
-          timestamp.toDate(),
-          data['title'] ?? '',
-          data['description'] ?? '',
-          EventType.fromString(data['eventType']??''),
-          eventId,
-          data['userId'],
-        );
-
-        events.add(event);
-      }
-
-      return events;
-    } catch (e) {
-      throw e;
-    }
-  }
-
-  Future<List<CustomEvent>> getUserEvents() async {
-    try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
-        throw Exception('User not logged in');
-      }
-      QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
-          .collection('events')
-          .where('userId', isEqualTo: user.uid)
-          .get();
-
-      List<CustomEvent> events = [];
-
-      for (var doc in snapshot.docs) {
-        Map<String, dynamic> data = doc.data();
-        String eventId = doc.id;
-        final Timestamp timestamp = data['dateTime'];
-
-        CustomEvent event = CustomEvent(
-          LatLng(data['latitude']?? 0.0, data['longitude']?? 0.0),
-          timestamp.toDate(),
-          data['title'] ?? '',
-          data['description'] ?? '',
-          EventType.fromString(data['eventType']??''),
-          eventId,
-          data['userId'],
-        );
-        events.add(event);
-      }
-      return events;
-    } catch (e) {
-      throw e;
-    }
   }
 
   // Sign-up function
@@ -171,11 +88,11 @@ class AuthProvider extends ChangeNotifier {
     } catch (e) {
       // Handle login errors based on Firebase Auth error codes
       if (e is FirebaseAuthException) {
-        if (e.code == 'user-not-found') {
-          print('No user found with this email');
+        if (e.code == 'invalid-email') {
+          Fluttertoast.showToast(msg: 'No user found with this email');
           // You can show a corresponding error message
-        } else if (e.code == 'wrong-password') {
-          print('Incorrect password');
+        } else if (e.code == 'invalid-credential') {
+          Fluttertoast.showToast(msg: 'Incorrect password');
           // You can show a corresponding error message
         } else {
           print('Login error: ${e.code}');
@@ -266,6 +183,181 @@ class AuthProvider extends ChangeNotifier {
     return user != null;
   }
 
+  // EVENT-RELATED FUNCTIONS
+
+  Future<void> addEvent(CustomEvent event) async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+
+      if (user == null) {
+        throw Exception('User not logged in');
+      }
+      final eventToAdd = event.toDBEvent(userId: user.uid);
+
+      // Add event to Firestore
+      await FirebaseFirestore.instance.collection('events').add(eventToAdd.toMap());
+
+      notifyListeners();
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  Future<List<CustomEvent>> getAllEvents() async {
+    try {
+      QuerySnapshot<Map<String, dynamic>> snapshot =
+          await _firestore.collection('events').get();
+
+      List<CustomEvent> events = [];
+
+      for (var doc in snapshot.docs) {
+        Map<String, dynamic> data = doc.data();
+        String eventId = doc.id;
+        final Timestamp timestamp = data['dateTime'];
+
+        CustomEvent event = CustomEvent(
+          LatLng(data['latitude']?? 0.0, data['longitude']?? 0.0),
+          timestamp.toDate(),
+          data['title'] ?? '',
+          data['description'] ?? '',
+          EventType.fromString(data['eventType']??''),
+          eventId,
+          data['userId'],
+        );
+
+        events.add(event);
+      }
+
+      return events;
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  Future<List<CustomEvent>> getUserEvents() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        throw Exception('User not logged in');
+      }
+      QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
+          .collection('events')
+          .where('userId', isEqualTo: user.uid)
+          .get();
+
+      List<CustomEvent> events = [];
+
+      for (var doc in snapshot.docs) {
+        Map<String, dynamic> data = doc.data();
+        String eventId = doc.id;
+        final Timestamp timestamp = data['dateTime'];
+
+        CustomEvent event = CustomEvent(
+          LatLng(data['latitude']?? 0.0, data['longitude']?? 0.0),
+          timestamp.toDate(),
+          data['title'] ?? '',
+          data['description'] ?? '',
+          EventType.fromString(data['eventType']??''),
+          eventId,
+          data['userId'],
+        );
+        events.add(event);
+      }
+      return events;
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  Future<void> addEventSubscription(EventSubscription subscription) async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+
+      if (user == null) {
+        throw Exception('User not logged in');
+      }
+
+      // Add event to Firestore
+      await FirebaseFirestore.instance.collection('event-subscriptions').add(subscription.toMap());
+
+      notifyListeners();
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  Future<void> deleteEventSubscription(EventSubscription subscription) async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+
+      if (user == null) {
+        throw Exception('User not logged in');
+      }
+      // Add event to Firestore
+      await FirebaseFirestore.instance
+          .collection('event-subscriptions')
+          .doc(subscription.id)
+          .delete();
+
+      notifyListeners();
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  Future<List<EventSubscription>> getEventSubscriptionsByUserId(String userId) async {
+    try {
+      QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
+          .collection('event-subscriptions')
+          .where("user-id", isEqualTo: userId)
+          .get();
+
+      List<EventSubscription> subs = [];
+
+      for (var doc in snapshot.docs) {
+        Map<String, dynamic> data = doc.data();
+        String subscriptionId = doc.id;
+
+        EventSubscription sub = EventSubscription(
+          id: subscriptionId,
+          eventId: data['event-id'] ?? '',
+          userId: data['user-id'] ?? '',
+        );
+        subs.add(sub);
+      }
+      return subs;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<List<EventSubscription>> getEventSubscriptionsByEventId(String eventId) async {
+    try {
+      QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
+          .collection('event-subscriptions')
+          .where("event-id", isEqualTo: eventId)
+          .get();
+
+      List<EventSubscription> subs = [];
+
+      for (var doc in snapshot.docs) {
+        Map<String, dynamic> data = doc.data();
+        String subscriptionId = doc.id;
+
+        EventSubscription sub = EventSubscription(
+          id: subscriptionId,
+          eventId: data['event-id'] ?? '',
+          userId: data['user-id'] ?? '',
+        );
+        subs.add(sub);
+      }
+      return subs;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+
   static of(BuildContext context) {}
 }
 
@@ -339,6 +431,25 @@ class Event {
       'latitude': latitude,
       'longitude': longitude,
       'eventType': eventType,
+      'userId': userId,
+    };
+  }
+}
+
+class EventSubscription {
+  final String? id;
+  final String eventId;
+  final String userId;
+
+  EventSubscription({
+    required this.id,
+    required this.eventId,
+    required this.userId,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'eventId': eventId,
       'userId': userId,
     };
   }
