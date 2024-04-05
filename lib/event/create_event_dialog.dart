@@ -150,8 +150,8 @@ class _CreateEventDialogState extends State<CreateEventDialog> {
               ? () {
                   Navigator.pop(
                     context,
-                    CustomEvent(selectedLocation!, selectedDateTime!, title,
-                        description, selectedEventType),
+                    CustomEvent(selectedLocation!, selectedDateTime!, title.trim(),
+                        description.trim(), selectedEventType),
                   );
                 }
               : null,

@@ -81,9 +81,9 @@ class SignUpPage extends StatelessWidget {
                     } else {
                       Provider.of<BZAuthProvider>(context, listen: false)
                           .signUp(
-                        email: emailController.text,
+                        email: emailController.text.trim(),
                         password: password,
-                        displayName: displayNameController.text,
+                        displayName: displayNameController.text.trim(),
                       )
                           .then((result) {
                         // Successfully signed up

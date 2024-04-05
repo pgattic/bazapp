@@ -13,7 +13,6 @@ class UserProfileScreen extends StatefulWidget {
 }
 
 class _UserProfilePageState extends State<UserProfileScreen> {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   Future<void> _changeProfilePicture(BZAuthProvider authProvider) async {
     final picker = ImagePicker();

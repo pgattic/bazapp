@@ -82,7 +82,7 @@ class _LoginPageState extends State<LoginPage> {
                       if (_formKey.currentState!.validate()) {
                         // Perform login with email and password
                         authProvider.login(
-                          email: _emailController.text,
+                          email: _emailController.text.trim(),
                           password: _passwordController.text,
                         );
                       }
