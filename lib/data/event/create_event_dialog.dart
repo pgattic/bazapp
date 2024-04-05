@@ -43,6 +43,7 @@ class _CreateEventDialogState extends State<CreateEventDialog> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextField(
+              textCapitalization: TextCapitalization.words,
               decoration: InputDecoration(labelText: 'Title'),
               onChanged: (value) {
                 setState(() {
@@ -52,6 +53,7 @@ class _CreateEventDialogState extends State<CreateEventDialog> {
               },
             ),
             TextField(
+              textCapitalization: TextCapitalization.sentences,
               decoration: InputDecoration(labelText: 'Description'),
               maxLines: null,
               onChanged: (value) {

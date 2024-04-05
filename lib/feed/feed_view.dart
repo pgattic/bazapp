@@ -21,7 +21,7 @@ class _FeedScreenState extends State<FeedScreen> {
     _fetchEvents();
 
     // Listen for changes in AuthProvider
-    Provider.of<AuthProvider>(context, listen: false)
+    Provider.of<BZAuthProvider>(context, listen: false)
         .addListener(_onAuthProviderChange);
   }
 
@@ -31,7 +31,7 @@ class _FeedScreenState extends State<FeedScreen> {
 
   void _fetchEvents() async {
     try {
-      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final authProvider = Provider.of<BZAuthProvider>(context, listen: false);
       List<CustomEvent> events = await authProvider.getUserEvents();
       setState(() {
         feedEventList = events;
@@ -43,7 +43,7 @@ class _FeedScreenState extends State<FeedScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<AuthProvider>(
+    return Consumer<BZAuthProvider>(
       builder: (context, authProvider, child) {
         final user = authProvider.user;
 

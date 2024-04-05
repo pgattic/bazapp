@@ -22,7 +22,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     _fetchEvents();
 
     // Listen for changes in AuthProvider
-    Provider.of<AuthProvider>(context, listen: false)
+    Provider.of<BZAuthProvider>(context, listen: false)
         .addListener(_onAuthProviderChange);
   }
 
@@ -32,7 +32,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   void _fetchEvents() async {
     try {
-      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final authProvider = Provider.of<BZAuthProvider>(context, listen: false);
       List<CustomEvent> events = await authProvider.getUserEvents();
       setState(() {
         feedEventList = events;
@@ -89,7 +89,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   Future<void> _createEvent(CustomEvent event, BuildContext context) async {
     try {
-      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final authProvider = Provider.of<BZAuthProvider>(context, listen: false);
       // Add event to Firebase
       await authProvider.addEvent(event);
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(

@@ -1,10 +1,12 @@
+import 'package:bazapp/messages/chat_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class UserProfileSmall extends StatelessWidget {
   final String userId;
+  final String? viewerId;
 
-  UserProfileSmall({Key? key, required this.userId}) : super(key: key);
+  const UserProfileSmall({Key? key, required this.userId, this.viewerId}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -12,7 +14,7 @@ class UserProfileSmall extends StatelessWidget {
       future: FirebaseFirestore.instance.collection('users').doc(userId).get(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return CircularProgressIndicator();
+          return const CircularProgressIndicator();
         }
 
         if (snapshot.hasError) {
@@ -20,7 +22,7 @@ class UserProfileSmall extends StatelessWidget {
         }
 
         if (!snapshot.hasData || snapshot.data == null) {
-          return Text('User not found');
+          return const Text('User not found');
         }
 
         final userData = snapshot.data!.data() as Map<String, dynamic>;
@@ -34,23 +36,35 @@ class UserProfileSmall extends StatelessWidget {
               backgroundImage: NetworkImage(iconUrl),
               radius: 20,
             ),
-            SizedBox(width: 8),
+            const SizedBox(width: 8),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  displayName,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                  ),
+                Row(
+                  children: [
+                    Text(
+                      displayName,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    if (viewerId == userId) const Text(' (you)', style: TextStyle(color: Colors.grey)),
+                  ],
                 ),
                 Text(
                   email,
-                  style: TextStyle(
-                    color: Colors.grey,
-                  ),
+                  style: const TextStyle(color: Colors.grey),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
+            ),
+            Spacer(),
+            if (viewerId != userId) IconButton(
+              onPressed: () => {
+                Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) =>
+                      ChatScreen(recipientUid: userId),
+                ))
+              },
+              icon: Icon(Icons.chat),
             ),
           ],
         );

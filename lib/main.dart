@@ -20,7 +20,7 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => AuthProvider()),
+        ChangeNotifierProvider(create: (context) => BZAuthProvider()),
       ],
       child: const MyApp(),
     ),
@@ -57,7 +57,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: Consumer<AuthProvider>(
+      home: Consumer<BZAuthProvider>(
         builder: (context, authProvider, child) {
           final user = authProvider.user;
           print('User: $user');

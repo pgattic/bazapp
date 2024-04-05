@@ -305,6 +305,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   child: ConstrainedBox(
                     constraints: BoxConstraints(maxHeight: 100),
                     child: TextField(
+                      textCapitalization: TextCapitalization.sentences,
                       textInputAction: TextInputAction.send,
                       maxLines: null, // Limit to 5 lines
                       scrollPhysics: BouncingScrollPhysics(),

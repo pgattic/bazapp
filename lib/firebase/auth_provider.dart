@@ -9,7 +9,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
-class AuthProvider extends ChangeNotifier {
+class BZAuthProvider extends ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   User? _user;
@@ -173,7 +173,7 @@ class AuthProvider extends ChangeNotifier {
   }
 
   void setUserIconURL(String iconURL, context) {
-    final authProvider = Provider.of<AuthProvider>(context);
+    final authProvider = Provider.of<BZAuthProvider>(context);
     final user = authProvider.user;
     user?.icon = iconURL;
   }
@@ -197,6 +197,28 @@ class AuthProvider extends ChangeNotifier {
       // Add event to Firestore
       await FirebaseFirestore.instance.collection('events').add(eventToAdd.toMap());
 
+      notifyListeners();
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  Future<void> removeEvent(String eventId) async {
+    try {
+      // Remove the event
+      await _firestore.collection('events').doc(eventId).delete();
+      
+      // Also remove event subscriptions tied to the event
+      await FirebaseFirestore.instance
+          .collection('event-subscriptions')
+          .where('event-id', isEqualTo: eventId)
+          .get()
+          .then((QuerySnapshot querySnapshot) {
+            for (var doc in querySnapshot.docs) {
+              doc.reference.delete();
+            }
+          });
+      
       notifyListeners();
     } catch (e) {
       throw e;
@@ -263,13 +285,19 @@ class AuthProvider extends ChangeNotifier {
         );
         events.add(event);
       }
+      for (var event in await getEventSubscriptionsByUserId(user.uid)) {
+        var customEvent = await _getEventById(event.eventId);
+        if (customEvent != null) {
+          events.add(customEvent);
+        }
+      }
       return events;
     } catch (e) {
       throw e;
     }
   }
 
-  Future<void> addEventSubscription(EventSubscription subscription) async {
+  Future<void> subscribeToEvent(String userId, String eventId) async {
     try {
       final user = FirebaseAuth.instance.currentUser;
 
@@ -277,8 +305,13 @@ class AuthProvider extends ChangeNotifier {
         throw Exception('User not logged in');
       }
 
+      final Map<String, dynamic> subscription = {
+        'user-id': userId,
+        'event-id': eventId,
+      };
+
       // Add event to Firestore
-      await FirebaseFirestore.instance.collection('event-subscriptions').add(subscription.toMap());
+      await FirebaseFirestore.instance.collection('event-subscriptions').add(subscription);
 
       notifyListeners();
     } catch (e) {
@@ -286,18 +319,25 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> deleteEventSubscription(EventSubscription subscription) async {
+  Future<void> unsubscribeToEvent(String userId, String eventId) async {
     try {
       final user = FirebaseAuth.instance.currentUser;
 
       if (user == null) {
         throw Exception('User not logged in');
       }
-      // Add event to Firestore
+
+      // Remove subscriptions from Firestore
       await FirebaseFirestore.instance
           .collection('event-subscriptions')
-          .doc(subscription.id)
-          .delete();
+          .where('user-id', isEqualTo: userId)
+          .where('event-id', isEqualTo: eventId)
+          .get()
+          .then((QuerySnapshot querySnapshot) {
+            for (var doc in querySnapshot.docs) {
+              doc.reference.delete();
+            }
+          });
 
       notifyListeners();
     } catch (e) {
@@ -357,8 +397,66 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  Future<List<CustomEvent>> getSubscribedEventsByUserId(String userId) async {
+    try {
+      List<CustomEvent> events = [];
+      var subs = await getEventSubscriptionsByUserId(userId);
+      for (var sub in subs) {
+        CustomEvent? event = await _getEventById(sub.eventId);
+        if (event != null) {
+          events.add(event);
+        }
+      }
+      return events;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<CustomEvent?> _getEventById(String eventId) async {
+    try {
+      QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
+          .collection('events')
+          .where('eventId', isEqualTo: eventId)
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        Map<String, dynamic> data = snapshot.docs.first.data();
+        String eventId = snapshot.docs.first.id;
+        final Timestamp timestamp = data['dateTime'];
+        CustomEvent event = CustomEvent(
+          LatLng(data['latitude']?? 0.0, data['longitude']?? 0.0),
+          timestamp.toDate(),
+          data['title'] ?? '',
+          data['description'] ?? '',
+          EventType.fromString(data['eventType']??''),
+          eventId,
+          data['userId'],
+        );
+        return event;
+      } else {
+        return null;
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<int?> getEventSubscriptionCount(String eventId) async {
+    try {
+      QuerySnapshot snapshot = await _firestore
+          .collection('event-subscriptions')
+          .where('event-id', isEqualTo: eventId)
+          .get();
+
+      return snapshot.size;
+    } catch (e) {
+      return null;
+    }
+  }
 
   static of(BuildContext context) {}
+
 }
 
 class User {
@@ -437,7 +535,7 @@ class Event {
 }
 
 class EventSubscription {
-  final String? id;
+  final String id;
   final String eventId;
   final String userId;
 

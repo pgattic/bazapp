@@ -18,96 +18,100 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    final authProvider = Provider.of<AuthProvider>(context);
+    final authProvider = Provider.of<BZAuthProvider>(context);
 
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              ClipRRect(
-                borderRadius: BorderRadius.circular(40.0), // Adjust the radius as needed
-                  child: Image.asset(
-                    'assets/images/logo.png',
-                    width: 150,
-                    height: 150,
+      body: Center(
+        child: SingleChildScrollView(
+          child: Container(
+            padding: const EdgeInsets.all(12.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(40.0), // Adjust the radius as needed
+                      child: Image.asset(
+                        'assets/images/logo.png',
+                        width: 150,
+                        height: 150,
+                      ),
                   ),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Login',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _emailController,
-                decoration: InputDecoration(
-                  labelText: 'Email',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Login',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
-                ),
-                validator: (value) {
-                  if (value!.isEmpty) {
-                    return 'Please enter your email';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 8),
-              TextFormField(
-                controller: _passwordController,
-                decoration: InputDecoration(
-                  labelText: 'Password',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _emailController,
+                    decoration: InputDecoration(
+                      labelText: 'Email',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value!.isEmpty) {
+                        return 'Please enter your email';
+                      }
+                      return null;
+                    },
                   ),
-                ),
-                validator: (value) {
-                  if (value!.isEmpty) {
-                    return 'Please enter your password';
-                  }
-                  return null;
-                },
-                obscureText: true,
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    controller: _passwordController,
+                    decoration: InputDecoration(
+                      labelText: 'Password',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value!.isEmpty) {
+                        return 'Please enter your password';
+                      }
+                      return null;
+                    },
+                    obscureText: true,
+                  ),
+                  const SizedBox(height: 8),
+                  ElevatedButton(
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        // Perform login with email and password
+                        authProvider.login(
+                          email: _emailController.text,
+                          password: _passwordController.text,
+                        );
+                      }
+                    },
+                    child: const Text('Login'),
+                  ),
+                  const SizedBox(height: 50),
+                  TextButton(
+                    onPressed: () {
+                      // Navigate to the sign-up page
+                      Navigator.of(context).push(
+                          MaterialPageRoute(builder: (context) => SignUpPage()));
+                    },
+                    child: const Text("Don't have an account? Sign Up"),
+                  ),
+                  // Display the password reset message.
+                  Text(_passwordResetMessage,
+                      style: TextStyle(color: Colors.green)),
+                  const SizedBox(height: 8),
+                  ElevatedButton(
+                    onPressed: () {
+                      // Implement password reset function
+                      _resetPassword(_emailController.text);
+                    },
+                    child: const Text('Forgot Password'),
+                  ),
+                ],
               ),
-              const SizedBox(height: 8),
-              ElevatedButton(
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    // Perform login with email and password
-                    authProvider.login(
-                      email: _emailController.text,
-                      password: _passwordController.text,
-                    );
-                  }
-                },
-                child: const Text('Login'),
-              ),
-              const SizedBox(height: 50),
-              TextButton(
-                onPressed: () {
-                  // Navigate to the sign-up page
-                  Navigator.of(context).push(
-                      MaterialPageRoute(builder: (context) => SignUpPage()));
-                },
-                child: const Text("Don't have an account? Sign Up"),
-              ),
-              // Display the password reset message.
-              Text(_passwordResetMessage,
-                  style: TextStyle(color: Colors.green)),
-              const SizedBox(height: 8),
-              ElevatedButton(
-                onPressed: () {
-                  // Implement password reset function
-                  _resetPassword(_emailController.text);
-                },
-                child: const Text('Forgot Password'),
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -116,7 +120,7 @@ class _LoginPageState extends State<LoginPage> {
 
   // Function to reset the user's password.
   void _resetPassword(String email) {
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final authProvider = Provider.of<BZAuthProvider>(context, listen: false);
     authProvider.resetPassword(email).then((result) {
       // Display a message to the user.
       setState(() {

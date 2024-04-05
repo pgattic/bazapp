@@ -113,7 +113,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
   List<Widget> chatButtons = [];
   Set<String> uniqueUserIds = Set(); // Store unique user IDs
 
-  Future<void> _fetchChatButtons(AuthProvider authProvider) async {
+  Future<void> _fetchChatButtons(BZAuthProvider authProvider) async {
     final user = authProvider.user;
 
     // Clear the existing chatButtons and uniqueUserIds when fetching
@@ -163,7 +163,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
 
   @override
   void initState() {
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final authProvider = Provider.of<BZAuthProvider>(context, listen: false);
     _fetchChatButtons(authProvider);
     super.initState();
   }

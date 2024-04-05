@@ -15,7 +15,7 @@ class UserProfileScreen extends StatefulWidget {
 class _UserProfilePageState extends State<UserProfileScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  Future<void> _changeProfilePicture(AuthProvider authProvider) async {
+  Future<void> _changeProfilePicture(BZAuthProvider authProvider) async {
     final picker = ImagePicker();
 
     try {
@@ -89,7 +89,7 @@ class _UserProfilePageState extends State<UserProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final authProvider = Provider.of<AuthProvider>(context);
+    final authProvider = Provider.of<BZAuthProvider>(context);
     final user = authProvider.user;
 
     return FutureBuilder<String?>(
@@ -140,7 +140,7 @@ class _UserProfilePageState extends State<UserProfileScreen> {
                   SizedBox(height: 30),
                   ElevatedButton(
                     onPressed: () {
-                      Provider.of<AuthProvider>(context, listen: false)
+                      Provider.of<BZAuthProvider>(context, listen: false)
                           .resetPassword(user.email);
                       Fluttertoast.showToast(
                         msg: 'Password Reset Email Sent!',
@@ -154,7 +154,7 @@ class _UserProfilePageState extends State<UserProfileScreen> {
                   ),
                   ElevatedButton(
                     onPressed: () {
-                      Provider.of<AuthProvider>(context, listen: false)
+                      Provider.of<BZAuthProvider>(context, listen: false)
                           .signOut();
                     },
                     child: const Text(
