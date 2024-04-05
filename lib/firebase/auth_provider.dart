@@ -14,6 +14,9 @@ class AuthProvider extends ChangeNotifier {
   User? _user;
 
   User? get user => _user;
+  Future<String?> getuser() async{
+    return FirebaseAuth.instance.currentUser?.uid;
+  }
 
   Future<void> addEvent(CustomEvent event) async {
     try {

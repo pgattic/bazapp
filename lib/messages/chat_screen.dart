@@ -213,7 +213,7 @@ class _ChatScreenState extends State<ChatScreen> {
               _chatMessages.add(message!);
             });
             // Trigger a notification for the new message
-            _showNotification(message?['text'] as String);
+           // _showNotification(message?['text'] as String);
           }
         });
         WidgetsBinding.instance.addPostFrameCallback((_) { // Scroll to the bottom of the conversation on ever update and at the beginning
@@ -233,24 +233,6 @@ class _ChatScreenState extends State<ChatScreen> {
     super.dispose();
   }
 
-  void _showNotification(String message) async {
-    const AndroidNotificationDetails androidPlatformChannelSpecifics =
-        AndroidNotificationDetails(
-      'your channel id',
-      'your channel name',
-      importance: Importance.max,
-      priority: Priority.high,
-    );
-    const NotificationDetails platformChannelSpecifics =
-        NotificationDetails(android: androidPlatformChannelSpecifics);
-    await flutterLocalNotificationsPlugin.show(
-      0,
-      'New Message',
-      message,
-      platformChannelSpecifics,
-      payload: 'item x',
-    );
-  }
 
   Future<void> _sendMessage(String text) async {
     try {
