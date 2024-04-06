@@ -42,7 +42,7 @@ Stream<QuerySnapshot> getChatMessages(String chatId) {
   return _firestore
       .collection('messages')
       .where('chatId', isEqualTo: chatId) // Query messages by chatId
-      .orderBy('timestamp', descending: false)
+      //.orderBy('timestamp', descending: false)
       .snapshots();
 }
 
@@ -147,6 +147,7 @@ String _generateChatId(String? userId1, String? userId2) {
     return _firestore
         .collection('chats')
         .where('senderId', isGreaterThanOrEqualTo: userId)
+        //.orderBy('timestamp', descending: false)
         .snapshots()
         .map((snapshot) {
       List<String> recentChats = [];
@@ -163,6 +164,7 @@ String _generateChatId(String? userId1, String? userId2) {
     });
   }
 }
+
 
 class ChatScreen extends StatefulWidget {
   final String recipientUid;
@@ -202,7 +204,7 @@ class _ChatScreenState extends State<ChatScreen> {
       _messagesStream = _firestore
           .collection('messages')
           .where('chatId', isEqualTo: chatId)
-          .orderBy('timestamp', descending: false)
+          //.orderBy('timestamp', descending: false)
           .snapshots()
           .listen((snapshot) {
         snapshot.docChanges.forEach((change) {
@@ -211,6 +213,7 @@ class _ChatScreenState extends State<ChatScreen> {
             // Add the message to the list
             setState(() {
               _chatMessages.add(message!);
+              _scrollToBottom();
             });
             // Trigger a notification for the new message
            // _showNotification(message?['text'] as String);
@@ -224,7 +227,13 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
 
-
+  void _scrollToBottom() {
+    _scrollController.animateTo(
+      _scrollController.position.maxScrollExtent,
+      duration: Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
 
   @override
   void dispose() {
@@ -320,7 +329,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         }
                       },
                       onTap: () async {
-                        await Future.delayed(const Duration(milliseconds: 400));
+                        await Future.delayed(const Duration(milliseconds: 300));
                         _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
                       },
                     ),
