@@ -42,7 +42,7 @@ Stream<QuerySnapshot> getChatMessages(String chatId) {
   return _firestore
       .collection('messages')
       .where('chatId', isEqualTo: chatId) // Query messages by chatId
-      //.orderBy('timestamp', descending: false)
+      .orderBy('timestamp', descending: false)
       .snapshots();
 }
 
@@ -147,7 +147,7 @@ String _generateChatId(String? userId1, String? userId2) {
     return _firestore
         .collection('chats')
         .where('senderId', isGreaterThanOrEqualTo: userId)
-        //.orderBy('timestamp', descending: false)
+        .orderBy('timestamp', descending: false)
         .snapshots()
         .map((snapshot) {
       List<String> recentChats = [];
@@ -190,41 +190,43 @@ class _ChatScreenState extends State<ChatScreen> {
   late StreamSubscription<QuerySnapshot<Map<String, dynamic>>> _messagesStream;
 
   @override
-  void initState() {
-    super.initState();
-    final user = _auth.currentUser;
-    _scrollController = ScrollController();
-    if (user != null) {
-      final currentUserUid = user.uid;
-      chatId = currentUserUid.hashCode <= widget.recipientUid.hashCode
-          ? '$currentUserUid${widget.recipientUid}'
-          : '${widget.recipientUid}$currentUserUid';
+void initState() {
+  super.initState();
+  final user = _auth.currentUser;
+  _scrollController = ScrollController();
+  if (user != null) {
+    final currentUserUid = user.uid;
+    chatId = currentUserUid.hashCode <= widget.recipientUid.hashCode
+        ? '$currentUserUid${widget.recipientUid}'
+        : '${widget.recipientUid}$currentUserUid';
 
-      // Start listening for new messages
-      _messagesStream = _firestore
-          .collection('messages')
-          .where('chatId', isEqualTo: chatId)
-          //.orderBy('timestamp', descending: false)
-          .snapshots()
-          .listen((snapshot) {
-        snapshot.docChanges.forEach((change) {
-          if (change.type == DocumentChangeType.added) {
-            final message = change.doc.data();
-            // Add the message to the list
-            setState(() {
-              _chatMessages.add(message!);
-              _scrollToBottom();
-            });
-            // Trigger a notification for the new message
-           // _showNotification(message?['text'] as String);
-          }
-        });
-        WidgetsBinding.instance.addPostFrameCallback((_) { // Scroll to the bottom of the conversation on ever update and at the beginning
-          _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
-        });
+    // Start listening for new messages
+    _messagesStream = _firestore
+        .collection('messages')
+        .where('chatId', isEqualTo: chatId)
+        .orderBy('timestamp', descending: false)
+        .snapshots()
+        .listen((snapshot) {
+      snapshot.docChanges.forEach((change) {
+        if (change.type == DocumentChangeType.added) {
+          final message = change.doc.data()!;
+          // Add the message to the list
+          setState(() {
+            _chatMessages.add(message);
+            _chatMessages.sort((a, b) => a['timestamp'].compareTo(b['timestamp'])); // Sort messages by timestamp
+            _scrollToBottom();
+          });
+          // Trigger a notification for the new message
+          // _showNotification(message?['text'] as String);
+        }
       });
-    }
+      WidgetsBinding.instance!.addPostFrameCallback((_) {
+        // Scroll to the bottom of the conversation on every update and at the beginning
+        _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+      });
+    });
   }
+}
 
 
   void _scrollToBottom() {

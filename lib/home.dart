@@ -1,4 +1,3 @@
-
 import 'dart:async';
 
 import 'package:bazapp/messages/messages_screen.dart';
@@ -29,12 +28,21 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0; // Initialize with the default index (e.g., home)
+  bool _notificationShown = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Bazapp'),
+        title: GestureDetector(
+          // Wrap title with GestureDetector
+          onTap: () {
+            // Trigger notification on title click
+            showNotificationSnackBar(context);
+            _listenForNewMessages();
+          },
+          child: const Text('Bazapp'),
+        ),
         actions: [
           IconButton(
             icon: Icon(Icons.person),
@@ -61,7 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
         return MapView();
       case 3:
         return MessagesScreen(
-          user: widget.user
+            user: widget.user
         ); // Pass the user to MessagesScreen
       case 4:
         return UserProfileScreen(); // Pass the user to UserProfileScreen
@@ -79,6 +87,7 @@ class _HomeScreenState extends State<HomeScreen> {
       onTap: (index) {
         setState(() {
           _currentIndex = index;
+          //_listenForNewMessages();
         });
       },
       items: const [
@@ -113,36 +122,51 @@ class _HomeScreenState extends State<HomeScreen> {
     _listenForNewMessages();
   }
 
-  void _listenForNewMessages() {
-  // Query Firebase every 15 seconds to check for new messages
-  Timer.periodic(Duration(seconds: 15), (timer) async {
-    // Get the current user's UID
-    final currentUserUid = FirebaseAuth.instance.currentUser?.uid;
+void _listenForNewMessages() {
+    //print("Trying to get messages");
+    Timer.periodic(Duration(seconds: 15), (timer) async {
+      
+      print("Trying to get messages");
+      final currentUserUid = FirebaseAuth.instance.currentUser?.uid;
+      if (currentUserUid != null) {
+        try {
+          DateTime now = DateTime.now();
+          DateTime fifteenSecondsAgo = now.subtract(Duration(seconds: 17));
+          final querySnapshot = await FirebaseFirestore.instance
+              .collection('messages')
+              .where('recipientId', isEqualTo: currentUserUid)
+              .where('timestamp', isGreaterThan: fifteenSecondsAgo)
+              .where('timestamp', isLessThan: now)
+              .orderBy('timestamp', descending: true)
+              .limit(1)
+              .get();
+          if (querySnapshot.docs.isNotEmpty && !_notificationShown) {
+            showNotificationSnackBar(context);
+            _notificationShown = true; // Set the flag to true
+            Timer(Duration(seconds: 30), () {
+              setState(() {
+                _notificationShown = false; // Reset the flag after one minute
+                //initState();
+                print('bool changed');
 
-    if (currentUserUid != null) {
-      try {
-        // Query Firestore for new messages
-        final querySnapshot = await FirebaseFirestore.instance
-            .collection('messages')
-            .where('recipientId', isEqualTo: currentUserUid)
-            .orderBy('timestamp', descending: true) // Order by timestamp to get the latest message first
-            .limit(1) // Limit to 1 message
-            .get();
-
-        // Check if there are any new messages
-        if (querySnapshot.docs.isNotEmpty) {
-          // Show a toast notification
-          Fluttertoast.showToast(
-            msg: 'You have a new message!',
-            gravity: ToastGravity.TOP,
-            toastLength: Toast.LENGTH_LONG,
-          );
+              });
+            });
+          }
+        } catch (e) {
+          print('Error querying Firestore: $e');
         }
-      } catch (e) {
-        print('Error querying Firestore: $e');
       }
-    }
-  });
-}
+    });
+  }
 
+  void showNotificationSnackBar(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('You have a new message!'),
+        duration: Duration(seconds: 5),
+        behavior: SnackBarBehavior.floating,
+        margin: EdgeInsets.only(top: 64.0),
+      ),
+    );
+  }
 }
