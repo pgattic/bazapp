@@ -1,22 +1,13 @@
 import 'dart:async';
-
 import 'package:bazapp/messages/messages_screen.dart';
 import 'package:bazapp/user_profile/user_profile_screen.dart';
-import 'package:bazapp/app_colors.dart';
 import 'package:bazapp/planner/planner_view.dart';
 import 'package:bazapp/feed/feed_view.dart';
 import 'package:bazapp/map/map_view.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:bazapp/firebase/auth_provider.dart';
-import 'package:bazapp/feed/feed_view.dart';
-import 'package:bazapp/messages/messages_screen.dart';
-import 'package:bazapp/planner/planner_view.dart';
-import 'package:bazapp/user_profile/user_profile_screen.dart';
-import 'package:flutter/material.dart';
 import 'package:bazapp/firebase/auth_provider.dart' as fire;
-import 'package:fluttertoast/fluttertoast.dart';
 
 class HomeScreen extends StatefulWidget {
   final fire.User user; // Receive user information
@@ -45,7 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.person),
+            icon: Icon(Icons.settings),
             onPressed: () {
               setState(() {
                 _currentIndex = 4;
@@ -122,7 +113,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _listenForNewMessages();
   }
 
-void _listenForNewMessages() {
+  void _listenForNewMessages() {
     //print("Trying to get messages");
     Timer.periodic(Duration(seconds: 15), (timer) async {
       

@@ -13,7 +13,7 @@ enum EventType {
   ),
   sale(
     stringName: "Sale",
-    icon: Icons.monetization_on,
+    icon: Icons.attach_money,
     color: Colors.green
   ),
   trip(

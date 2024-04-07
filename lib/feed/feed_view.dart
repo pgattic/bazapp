@@ -32,7 +32,7 @@ class _FeedScreenState extends State<FeedScreen> {
   void _fetchEvents() async {
     try {
       final authProvider = Provider.of<BZAuthProvider>(context, listen: false);
-      List<CustomEvent> events = await authProvider.getUserEvents();
+      List<CustomEvent> events = await authProvider.getFeedEvents();
       setState(() {
         feedEventList = events;
       });

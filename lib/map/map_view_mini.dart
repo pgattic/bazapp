@@ -33,10 +33,10 @@ class MapViewMini extends StatelessWidget {
           MarkerLayer(
             markers: [
               Marker(
-                width: 30.0,
-                height: 30.0,
                 point: location,
-                child: const Icon(Icons.circle, color: Colors.red, size: 25.0),
+                rotate: true,
+                alignment: Alignment.topCenter,
+                child: const Icon(Icons.location_on, color: Colors.red, size: 32.0),
               ),
             ],
           ),

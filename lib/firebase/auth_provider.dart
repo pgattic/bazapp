@@ -256,7 +256,7 @@ class BZAuthProvider extends ChangeNotifier {
     }
   }
 
-  Future<List<CustomEvent>> getUserEvents() async {
+  Future<List<CustomEvent>> getOwnedEvents() async {
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) {
@@ -285,13 +285,44 @@ class BZAuthProvider extends ChangeNotifier {
         );
         events.add(event);
       }
-      for (var event in await getEventSubscriptionsByUserId(user.uid)) {
-        var customEvent = await _getEventById(event.eventId);
-        if (customEvent != null) {
-          events.add(customEvent);
-        }
-      }
       return events;
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  Future<List<CustomEvent>> getFeedEvents() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        throw Exception('User not logged in');
+      }
+      final subbedEvents = await getSubscribedEventsByUserId(user.uid);
+      final userEvents = await getOwnedEvents();
+      // merge subbed events and user events
+      final result = subbedEvents + userEvents;
+      // sort by date
+      result.sort((a, b) => a.dateTime.compareTo(b.dateTime));
+      // remove events that are yesterday or before
+      result.removeWhere((event) => event.dateTime.isBefore(DateTime.now().subtract(Duration(days: 1))));
+      
+      return result;
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  Future<List<CustomEvent>> getCalendarEvents() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        throw Exception('User not logged in');
+      }
+      final subbedEvents = await getSubscribedEventsByUserId(user.uid);
+      final userEvents = await getOwnedEvents();
+      // merge subbed events and user events
+      final result = subbedEvents + userEvents;
+      return result;
     } catch (e) {
       throw e;
     }
@@ -415,18 +446,19 @@ class BZAuthProvider extends ChangeNotifier {
 
   Future<CustomEvent?> _getEventById(String eventId) async {
     try {
-      QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
-          .collection('events')
-          .where('eventId', isEqualTo: eventId)
-          .get();
+      DocumentSnapshot<Map<String, dynamic>> snapshot =
+          await _firestore.collection('events').doc(eventId).get();
 
-      if (snapshot.docs.isNotEmpty) {
-        Map<String, dynamic> data = snapshot.docs.first.data();
-        String eventId = snapshot.docs.first.id;
-        final Timestamp timestamp = data['dateTime'];
+      if (!snapshot.exists) {
+        return null;
+      }
+      if (snapshot.data() != null) {
+        Map<String, dynamic> data = snapshot.data()!;
+        String eventId = snapshot.id;
+
         CustomEvent event = CustomEvent(
           LatLng(data['latitude']?? 0.0, data['longitude']?? 0.0),
-          timestamp.toDate(),
+          data['dateTime'].toDate(),
           data['title'] ?? '',
           data['description'] ?? '',
           EventType.fromString(data['eventType']??''),
@@ -434,9 +466,8 @@ class BZAuthProvider extends ChangeNotifier {
           data['userId'],
         );
         return event;
-      } else {
-        return null;
       }
+      return null;
     } catch (e) {
       rethrow;
     }

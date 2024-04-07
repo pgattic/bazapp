@@ -56,13 +56,13 @@ class _LocationSelectorState extends State<LocationSelector> {
                 MarkerLayer(
                   markers: [
                     Marker(
-                      width: 30.0,
-                      height: 30.0,
                       point: result,
+                      rotate: true,
+                      alignment: Alignment.topCenter,
                       child: const Icon(
-                        Icons.circle,
+                        Icons.location_on,
                         color: Colors.red,
-                        size: 30.0,
+                        size: 32.0,
                       ),
                     ),
                   ],

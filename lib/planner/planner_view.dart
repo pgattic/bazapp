@@ -33,7 +33,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   void _fetchEvents() async {
     try {
       final authProvider = Provider.of<BZAuthProvider>(context, listen: false);
-      List<CustomEvent> events = await authProvider.getUserEvents();
+      List<CustomEvent> events = await authProvider.getCalendarEvents();
       setState(() {
         feedEventList = events;
       });

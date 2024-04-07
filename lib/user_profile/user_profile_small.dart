@@ -6,7 +6,8 @@ class UserProfileSmall extends StatelessWidget {
   final String userId;
   final String? viewerId;
 
-  const UserProfileSmall({Key? key, required this.userId, this.viewerId}) : super(key: key);
+  const UserProfileSmall({Key? key, required this.userId, this.viewerId})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -31,41 +32,46 @@ class UserProfileSmall extends StatelessWidget {
         final String iconUrl = userData['icon'];
 
         return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             CircleAvatar(
               backgroundImage: NetworkImage(iconUrl),
               radius: 20,
             ),
             const SizedBox(width: 8),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      displayName,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    if (viewerId == userId) const Text(' (you)'),
-                  ],
-                ),
-                Text(
-                  email,
-                  style: const TextStyle(color: Colors.grey),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          displayName + (viewerId == userId ? ' (you)' : ''),
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Spacer(),
+                    ],
+                  ),
+                  Text(
+                    email,
+                    style: const TextStyle(color: Colors.grey),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
             ),
-            Spacer(),
-            if (viewerId != userId) IconButton(
-              onPressed: () => {
-                Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) =>
-                      ChatScreen(recipientUid: userId),
-                ))
-              },
-              icon: Icon(Icons.chat),
-            ),
+            if (viewerId != userId)
+              IconButton(
+                onPressed: () => {
+                  Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => ChatScreen(recipientUid: userId),
+                  ))
+                },
+                icon: Icon(Icons.chat),
+              ),
           ],
         );
       },

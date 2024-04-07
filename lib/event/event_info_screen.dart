@@ -18,7 +18,13 @@ class EventInfoScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Event Details'),
+        title: Row(
+          children: [
+            Text('Event Details'),
+            Spacer(),
+            IconButton(icon: const Icon(Icons.delete), onPressed: () => {},),
+          ],
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -44,13 +50,19 @@ class EventInfoScreen extends StatelessWidget {
               style: Constants.defaultTextStyle,
             ),
             SizedBox(height: 16),
-            Text(
-              TimeFunctions.yMMMMd(event.dateTime),
-              style: Constants.defaultTextStyle,
-            ),
-            SizedBox(height: 8),
             MapViewMini(event.location, height: 200),
             SizedBox(height: 16),
+            Row(
+              children: [
+                Icon(Icons.event),
+                SizedBox(width: 4),
+                Text(
+                  TimeFunctions.yMMMMd(event.dateTime),
+                  style: Constants.defaultTextStyle,
+                ),
+              ],
+            ),
+            SizedBox(height: 8),
             EventSubscriptionDialog(event, viewerId: user?.uid),
             SizedBox(height: 8),
             Text("Created by:"),

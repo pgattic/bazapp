@@ -127,7 +127,7 @@ class _UserProfilePageState extends State<UserProfileScreen> {
                   Container(
                     child: Text(
                       user.displayName,
-                      style: TextStyle(fontSize: 20),
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                   ),
                   Container(
@@ -137,7 +137,7 @@ class _UserProfilePageState extends State<UserProfileScreen> {
                     ),
                   ),
                   SizedBox(height: 30),
-                  ElevatedButton(
+                  TextButton(
                     onPressed: () {
                       Provider.of<BZAuthProvider>(context, listen: false)
                           .resetPassword(user.email);
@@ -148,17 +148,17 @@ class _UserProfilePageState extends State<UserProfileScreen> {
                     },
                     child: const Text(
                       'Reset Password',
-                      style: TextStyle(fontSize: 20, color: Colors.black),
+                      style: TextStyle(fontSize: 20, color: Colors.black, fontWeight: FontWeight.normal),
                     ),
                   ),
-                  ElevatedButton(
+                  TextButton(
                     onPressed: () {
                       Provider.of<BZAuthProvider>(context, listen: false)
                           .signOut();
                     },
                     child: const Text(
                       'Sign Out',
-                      style: TextStyle(fontSize: 20, color: Colors.black),
+                      style: TextStyle(fontSize: 20, color: Colors.black, fontWeight: FontWeight.normal),
                     ),
                   ),
                 ],

@@ -54,7 +54,7 @@ class TimeFunctions {
   }
 
   static String getFormattedDateWithYear(DateTime dateTime) {
-    return '${getFormattedDate(dateTime)} ${dateTime.year}';
+    return '${getFormattedDate(dateTime)}, ${dateTime.year}';
   }
 
   static String yMMMMd(DateTime dateTime) {
