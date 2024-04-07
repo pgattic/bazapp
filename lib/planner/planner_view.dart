@@ -15,6 +15,7 @@ class CalendarScreen extends StatefulWidget {
 class _CalendarScreenState extends State<CalendarScreen> {
 
   List<CustomEvent> feedEventList = [];
+  int selectedView = 0;
 
   @override
   void initState() {
@@ -47,6 +48,48 @@ class _CalendarScreenState extends State<CalendarScreen> {
     return CalendarControllerProvider<Object?>(
       controller: EventController<Object?>(), // Provide the controller here
       child: Scaffold(
+        appBar: AppBar(
+          title: Row(
+            children: [
+              const Text("Planner"),
+              const Spacer(),
+              DropdownButton<int>(
+                value: selectedView,
+                onChanged: (value) {
+                  setState(() {
+                    selectedView = value ?? 0;
+                  });
+                },
+                items: const [
+                  DropdownMenuItem<int>(
+                    value: 0,
+                    child: Row(
+                      children: [
+                        Text("Day View"),
+                      ],
+                    ),
+                  ),
+                  DropdownMenuItem<int>(
+                    value: 1,
+                    child: Row(
+                      children: [
+                        Text("Week View"),
+                      ],
+                    ),
+                  ),
+                  DropdownMenuItem<int>(
+                    value: 2,
+                    child: Row(
+                      children: [
+                        Text("Month View"),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
         body: Builder(
           builder: (BuildContext context) {
             for (final event in feedEventList) {
@@ -61,14 +104,33 @@ class _CalendarScreenState extends State<CalendarScreen> {
               );
               CalendarControllerProvider.of(context).controller.add(calEvent);
             }
-            return DayView(
-              onEventTap: (events, date) {
-                final CustomEvent event = events[0].event as CustomEvent;
-                event.displayBottomSheet(context);
-              },
-              heightPerMinute: 1,
-              startHour: 5,
-            );
+            switch (selectedView) {
+              case 1:
+                return WeekView(
+                  onEventTap: (events, date) {
+                    final CustomEvent event = events[0].event as CustomEvent;
+                    event.displayBottomSheet(context);
+                  },
+                  heightPerMinute: 1,
+                  startHour: 5,
+                );
+              case 2:
+                return MonthView(
+                  onEventTap: (events, date) {
+                    final CustomEvent event = events.event as CustomEvent;
+                    event.displayBottomSheet(context);
+                  },
+                );
+              default:
+                return DayView(
+                  onEventTap: (events, date) {
+                    final CustomEvent event = events[0].event as CustomEvent;
+                    event.displayBottomSheet(context);
+                  },
+                  heightPerMinute: 1,
+                  startHour: 5,
+                );
+            }
           },
         ),
         floatingActionButton: FloatingActionButton(

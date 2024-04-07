@@ -57,6 +57,7 @@ class _FeedScreenState extends State<FeedScreen> {
                   'Welcome to the feed, ${user?.displayName ?? 'Guest'}!',
                   style: const TextStyle(fontSize: 20),
                 ),
+                Text("Upcoming events: ${feedEventList.length}"),
                 const SizedBox(height: 8),
                 if (feedEventList.isNotEmpty) Column(
                   children: feedEventList
