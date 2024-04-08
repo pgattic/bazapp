@@ -24,6 +24,8 @@ class _MapViewState extends State<MapView> {
   late StreamSubscription<loc.LocationData> locationSubscription;
   List<CustomEvent> mapEventList = [];
 
+  int attendeesFilter = 0;
+
   @override
   void initState() {
     super.initState();
@@ -53,7 +55,8 @@ class _MapViewState extends State<MapView> {
     }
   }
 
-  StreamSubscription<loc.LocationData> _createLocationStreamSubscription() { // TODO: Figure out what this is and why it fixes the runtime exceptions
+  StreamSubscription<loc.LocationData> _createLocationStreamSubscription() {
+    // TODO: Figure out what this is and why it fixes the runtime exceptions
     final streamController = StreamController<loc.LocationData>();
     return streamController.stream.listen((loc.LocationData currentLocation) {
       setState(() {
@@ -116,57 +119,115 @@ class _MapViewState extends State<MapView> {
       initialZoom = 15.0;
     }
 
-    return FlutterMap(
-      options: MapOptions(
-        initialCenter: initialCenter,
-        initialZoom: initialZoom,
-        maxZoom: 20,
-        onLongPress: (tapPos, point) async {
-          final eventToUpload = await showDialog<CustomEvent>(
-              context: context,
-              builder: (BuildContext context) {
-                return CreateEventDialog(selectedLocation: point);
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Map"),
+        actions: [
+          const Icon(Icons.filter_alt),
+          DropdownButton<int>(
+            value: attendeesFilter,
+            onChanged: (value) {
+              if (value == null) return;
+              setState(() {
+                attendeesFilter = value;
               });
-          if (eventToUpload == null) return;
-          _createEvent(eventToUpload, context);
-        },
-      ),
-      mapController: mapController,
-      children: [
-        TileLayer(
-          urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-          userAgentPackageName: 'com.example.app',
-        ),
-        MarkerLayer(
-          markers: [
-            ...mapEventList
-                .map((mapEvent) => mapEvent.toMarker(context))
-                .toList(),
-            if (currentLocation != null)
-              Marker(
-                width: 30.0,
-                height: 30.0,
-                point: currentLocation!,
-                child: const Stack(
-                  alignment: Alignment.center,
+            },
+            items: const [
+              DropdownMenuItem<int>(
+                value: 0,
+                child: Text("Off"),
+              ),
+              DropdownMenuItem<int>(
+                value: 1,
+                child: Row(
                   children: [
-                    Icon(
-                      Icons.circle,
-                      color: Colors.white,
-                      size: 25.0,
-                    ),
-                    Icon(
-                      Icons.circle,
-                      color: Color(0xFF2233CC),
-                      size: 20.0,
-                    ),
+                    Icon(Icons.person),
+                    Text("1+"),
                   ],
                 ),
               ),
-          ],
+              DropdownMenuItem<int>(
+                value: 5,
+                child: Row(
+                  children: [
+                    Icon(Icons.person),
+                    Text("5+"),
+                  ],
+                ),
+              ),
+              DropdownMenuItem<int>(
+                value: 10,
+                child: Row(
+                  children: [
+                    Icon(Icons.person),
+                    Text("10+"),
+                  ],
+                ),
+              ),
+            ],
+          )
+        ],
+      ),
+      body: FlutterMap(
+        options: MapOptions(
+          initialCenter: initialCenter,
+          initialZoom: initialZoom,
+          maxZoom: 20,
+          onLongPress: (tapPos, point) async {
+            final eventToUpload = await showDialog<CustomEvent>(
+                context: context,
+                builder: (BuildContext context) {
+                  return CreateEventDialog(selectedLocation: point);
+                });
+            if (eventToUpload == null) return;
+            _createEvent(eventToUpload, context);
+          },
         ),
-      ],
+        mapController: mapController,
+        children: [
+          TileLayer(
+            urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+            userAgentPackageName: 'com.example.app',
+          ),
+          MarkerLayer(
+            markers: [
+              ...mapEventList
+                  .map((mapEvent) => mapEvent.toMarker(context))
+                  .toList(),
+              if (currentLocation != null)
+                Marker(
+                  width: 30.0,
+                  height: 30.0,
+                  point: currentLocation!,
+                  child: const Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Icon(
+                        Icons.circle,
+                        color: Colors.white,
+                        size: 25.0,
+                      ),
+                      Icon(
+                        Icons.circle,
+                        color: Color(0xFF2233CC),
+                        size: 20.0,
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ),
     );
+  }
+
+  List<CustomEvent> _getFilteredEvents() {
+    if (attendeesFilter == 0) {
+      return mapEventList;
+    } else {
+      return mapEventList;
+    }
   }
 
   Future<void> _createEvent(CustomEvent event, BuildContext context) async {

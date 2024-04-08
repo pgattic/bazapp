@@ -2,22 +2,15 @@ import 'dart:async';
 
 import 'package:bazapp/messages/chat_screen.dart';
 import 'package:bazapp/messages/messages_screen.dart';
+import 'package:bazapp/preferences/preferences_view.dart';
 import 'package:bazapp/user_profile/user_profile_screen.dart';
-import 'package:bazapp/app_colors.dart';
 import 'package:bazapp/planner/planner_view.dart';
 import 'package:bazapp/feed/feed_view.dart';
 import 'package:bazapp/map/map_view.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:bazapp/firebase/auth_provider.dart';
-import 'package:bazapp/feed/feed_view.dart';
-import 'package:bazapp/messages/messages_screen.dart';
-import 'package:bazapp/planner/planner_view.dart';
-import 'package:bazapp/user_profile/user_profile_screen.dart';
-import 'package:flutter/material.dart';
 import 'package:bazapp/firebase/auth_provider.dart' as fire;
-import 'package:fluttertoast/fluttertoast.dart';
 
 class HomeScreen extends StatefulWidget {
   final fire.User user; // Receive user information
@@ -39,24 +32,26 @@ class _HomeScreenState extends State<HomeScreen> {
           // Wrap title with GestureDetector
           onTap: () {
             // Trigger notification on title click
-              ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('You have a new message!'),
-        duration: Duration(seconds: 5),
-        behavior: SnackBarBehavior.floating,
-        margin: EdgeInsets.only(top: 64.0),
-      ));
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text('You have a new message!'),
+              duration: Duration(seconds: 5),
+              behavior: SnackBarBehavior.floating,
+              margin: EdgeInsets.only(top: 64.0),
+            ));
             _listenForNewMessages();
           },
           child: const Text('Bazapp'),
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.person),
+            icon: const Icon(Icons.settings),
             onPressed: () {
-              setState(() {
-                _currentIndex = 4;
-              });
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const PreferencesView(),
+                )
+              );
             },
           ),
         ],
@@ -76,8 +71,7 @@ class _HomeScreenState extends State<HomeScreen> {
         return MapView();
       case 3:
         return MessagesScreen(
-            user: widget.user
-        ); // Pass the user to MessagesScreen
+            user: widget.user); // Pass the user to MessagesScreen
       case 4:
         return UserProfileScreen(); // Pass the user to UserProfileScreen
       default:
@@ -129,62 +123,63 @@ class _HomeScreenState extends State<HomeScreen> {
     _listenForNewMessages();
   }
 
-void _listenForNewMessages() {
-  Timer.periodic(Duration(seconds: 15), (timer) async {
-    print("Trying to get messages");
-    final currentUserUid = FirebaseAuth.instance.currentUser?.uid;
-    if (currentUserUid != null) {
-      try {
-        DateTime now = DateTime.now();
-        DateTime fifteenSecondsAgo = now.subtract(Duration(seconds: 17));
-        final querySnapshot = await FirebaseFirestore.instance
-            .collection('messages')
-            .where('recipientId', isEqualTo: currentUserUid)
-            .where('timestamp', isGreaterThan: fifteenSecondsAgo)
-            .where('timestamp', isLessThan: now)
-            .orderBy('timestamp', descending: true)
-            .limit(1)
-            .get();
-        if (querySnapshot.docs.isNotEmpty && !_notificationShown) {
-          String senderId = querySnapshot.docs[0]['senderId'];
-          showNotificationSnackBar(context, senderId); // Pass senderId to showNotificationSnackBar
-          _notificationShown = true;
-          Timer(Duration(seconds: 30), () {
-            setState(() {
-              _notificationShown = false;
-              print('bool changed');
+  void _listenForNewMessages() {
+    Timer.periodic(Duration(seconds: 15), (timer) async {
+      print("Trying to get messages");
+      final currentUserUid = FirebaseAuth.instance.currentUser?.uid;
+      if (currentUserUid != null) {
+        try {
+          DateTime now = DateTime.now();
+          DateTime fifteenSecondsAgo = now.subtract(Duration(seconds: 17));
+          final querySnapshot = await FirebaseFirestore.instance
+              .collection('messages')
+              .where('recipientId', isEqualTo: currentUserUid)
+              .where('timestamp', isGreaterThan: fifteenSecondsAgo)
+              .where('timestamp', isLessThan: now)
+              .orderBy('timestamp', descending: true)
+              .limit(1)
+              .get();
+          if (querySnapshot.docs.isNotEmpty && !_notificationShown) {
+            String senderId = querySnapshot.docs[0]['senderId'];
+            showNotificationSnackBar(
+                context, senderId); // Pass senderId to showNotificationSnackBar
+            _notificationShown = true;
+            Timer(Duration(seconds: 30), () {
+              setState(() {
+                _notificationShown = false;
+                print('bool changed');
+              });
             });
-          });
+          }
+        } catch (e) {
+          print('Error querying Firestore: $e');
         }
-      } catch (e) {
-        print('Error querying Firestore: $e');
       }
-    }
-  });
-}
-
+    });
+  }
 
   void showNotificationSnackBar(BuildContext context, String senderId) {
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text('You have a new message!'),
-      duration: Duration(seconds: 5),
-      behavior: SnackBarBehavior.floating,
-      margin: EdgeInsets.only(top: 64.0),
-      action: SnackBarAction(
-        label: 'Open Chat',
-        onPressed: () {
-          _openChatWith(senderId, FirebaseAuth.instance.currentUser!.uid);
-        },
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('You have a new message!'),
+        duration: Duration(seconds: 5),
+        behavior: SnackBarBehavior.floating,
+        margin: EdgeInsets.only(top: 64.0),
+        action: SnackBarAction(
+          label: 'Open Chat',
+          onPressed: () {
+            _openChatWith(senderId, FirebaseAuth.instance.currentUser!.uid);
+          },
+        ),
       ),
-    ),
-  );
-}
-void _openChatWith(String userId, String otherUserId) {
+    );
+  }
+
+  void _openChatWith(String userId, String otherUserId) {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => ChatScreen(recipientUid: otherUserId),
       ),
     );
-  } 
+  }
 }

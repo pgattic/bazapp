@@ -13,18 +13,21 @@ class CalendarScreen extends StatefulWidget {
 }
 
 class _CalendarScreenState extends State<CalendarScreen> {
-
   List<CustomEvent> feedEventList = [];
-  int selectedView = 0;
+  CalendarViewType selectedView = CalendarViewType.day;
 
   @override
   void initState() {
     super.initState();
     _fetchEvents();
 
+    final authProvider = Provider.of<BZAuthProvider>(context, listen: false);
+
     // Listen for changes in AuthProvider
-    Provider.of<BZAuthProvider>(context, listen: false)
-        .addListener(_onAuthProviderChange);
+    authProvider.addListener(_onAuthProviderChange);
+
+    final userPrefs = authProvider.userPreferences;
+    selectedView = userPrefs!.calendarViewType;
   }
 
   void _onAuthProviderChange() {
@@ -49,63 +52,70 @@ class _CalendarScreenState extends State<CalendarScreen> {
       controller: EventController<Object?>(), // Provide the controller here
       child: Scaffold(
         appBar: AppBar(
-          title: Row(
-            children: [
-              const Text("Planner"),
-              const Spacer(),
-              DropdownButton<int>(
-                value: selectedView,
-                onChanged: (value) {
-                  setState(() {
-                    selectedView = value ?? 0;
-                  });
-                },
-                items: const [
-                  DropdownMenuItem<int>(
-                    value: 0,
-                    child: Row(
-                      children: [
-                        Text("Day View"),
-                      ],
-                    ),
+          title: const Text("Planner"),
+          actions: [
+            DropdownButton<CalendarViewType>(
+              value: selectedView,
+              onChanged: (value) {
+                if (value == null) return;
+                setState(() {
+                  selectedView = value;
+                });
+              },
+              items: const [
+                DropdownMenuItem<CalendarViewType>(
+                  value: CalendarViewType.day,
+                  child: Row(
+                    children: [
+                      Text("Day View"),
+                    ],
                   ),
-                  DropdownMenuItem<int>(
-                    value: 1,
-                    child: Row(
-                      children: [
-                        Text("Week View"),
-                      ],
-                    ),
+                ),
+                DropdownMenuItem<CalendarViewType>(
+                  value: CalendarViewType.week,
+                  child: Row(
+                    children: [
+                      Text("Week View"),
+                    ],
                   ),
-                  DropdownMenuItem<int>(
-                    value: 2,
-                    child: Row(
-                      children: [
-                        Text("Month View"),
-                      ],
-                    ),
+                ),
+                DropdownMenuItem<CalendarViewType>(
+                  value: CalendarViewType.month,
+                  child: Row(
+                    children: [
+                      Text("Month View"),
+                    ],
                   ),
-                ],
-              ),
-            ],
-          ),
+                ),
+              ],
+            ),
+          ],
         ),
         body: Builder(
           builder: (BuildContext context) {
             for (final event in feedEventList) {
               final CalendarEventData<CustomEvent> calEvent = CalendarEventData(
-                  date: event.dateTime,
-                  startTime: event.dateTime,
-                  endTime: event.dateTime.add(const Duration(hours: 3)),
-                  title: event.title,
-                  description: event.description,
-                  color: event.type.color,
-                  event: event,
+                date: event.dateTime,
+                startTime: event.dateTime,
+                endTime: event.dateTime.add(const Duration(hours: 3)),
+                title: event.title,
+                description: event.description,
+                color: event.type.color,
+                event: event,
               );
               CalendarControllerProvider.of(context).controller.add(calEvent);
             }
             switch (selectedView) {
-              case 1:
+              case CalendarViewType.day:
+                return DayView(
+                  onEventTap: (events, date) {
+                    final CustomEvent event = events[0].event as CustomEvent;
+                    event.displayBottomSheet(context);
+                  },
+                  heightPerMinute: 1,
+                  startHour: 5,
+                );
+              case CalendarViewType.week:
                 return WeekView(
                   onEventTap: (events, date) {
                     final CustomEvent event = events[0].event as CustomEvent;
@@ -114,21 +124,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   heightPerMinute: 1,
                   startHour: 5,
                 );
-              case 2:
+              case CalendarViewType.month:
                 return MonthView(
                   onEventTap: (events, date) {
                     final CustomEvent event = events.event as CustomEvent;
                     event.displayBottomSheet(context);
                   },
-                );
-              default:
-                return DayView(
-                  onEventTap: (events, date) {
-                    final CustomEvent event = events[0].event as CustomEvent;
-                    event.displayBottomSheet(context);
-                  },
-                  heightPerMinute: 1,
-                  startHour: 5,
                 );
             }
           },
@@ -162,5 +163,35 @@ class _CalendarScreenState extends State<CalendarScreen> {
         content: Text('Failed to create event: $e'),
       ));
     }
+  }
+}
+
+enum CalendarViewType {
+  day(
+    stringName: 'Day',
+  ),
+  week(
+    stringName: 'Week',
+  ),
+  month(
+    stringName: 'Month',
+  );
+
+  final String stringName;
+
+  const CalendarViewType({required this.stringName});
+
+  @override
+  String toString() {
+    return stringName;
+  }
+
+  static CalendarViewType fromString(String string) {
+    for (var type in CalendarViewType.values) {
+      if (type.stringName.toLowerCase() == string.trim().toLowerCase()) {
+        return type;
+      }
+    }
+    return CalendarViewType.day;
   }
 }

@@ -78,6 +78,7 @@ class BZAuthProvider extends ChangeNotifier {
   Future<void> signOut() async {
     await _auth.signOut();
     _user = null;
+    _userPreferences = null;
     notifyListeners();
   }
 
