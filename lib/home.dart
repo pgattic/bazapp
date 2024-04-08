@@ -27,43 +27,51 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _notificationShown = false;
 
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     bool? isDarkMode = widget.userPreferences?.isDarkMode;
     return MaterialApp(
       theme: AppColors.lightMode,
       darkTheme: AppColors.darkMode,
       themeMode: isDarkMode == null ? ThemeMode.system : isDarkMode ? ThemeMode.dark : ThemeMode.light,
-      home: Scaffold(
-        appBar: AppBar(
-          title: GestureDetector(
-            onTap: () {
-              // Trigger test notification on title click
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                content: Text('You have a new message!'),
-                duration: Duration(seconds: 5),
-                behavior: SnackBarBehavior.floating,
-                margin: EdgeInsets.only(top: 64.0),
-              ));
-              _listenForNewMessages();
-            },
-            child: const Text('Bazapp'),
-          ),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.settings),
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder:(context) {
-                    return PreferencesDialog();
+      home: Builder(
+        builder: (context) {
+          _listenForNewMessages(context); // Call _listenForNewMessages inside Builder
+          return Scaffold(
+            appBar: AppBar(
+              title: GestureDetector(
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                    content: Text('You have a new message!'),
+                    duration: Duration(seconds: 5),
+                    behavior: SnackBarBehavior.floating,
+                    margin: EdgeInsets.only(top: 64.0),
+                  ));
+                },
+                child: const Text('Bazapp'),
+              ),
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.settings),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder:(context) {
+                        return PreferencesDialog();
+                      },
+                    ).then((_) => setState(() {})); // Refresh the screen so the settings changes take effect
                   },
-                ).then((_) => setState(() {})); // Refresh the screen so the settings changes take effect
-              },
+                ),
+              ],
             ),
-          ],
-        ),
-        body: _buildContent(), // Display different content based on selected icon
-        bottomNavigationBar: _buildBottomNavigationBar(),
+            body: _buildContent(), // Display different content based on selected icon
+            bottomNavigationBar: _buildBottomNavigationBar(),
+          );
+        },
       ),
     );
   }
@@ -123,14 +131,11 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  @override
-  void initState() {
-    super.initState();
     // Listen for updates to the messages and show a notification
-    _listenForNewMessages();
+
 //    Provider.of<BZAuthProvider>(context, listen: false)
 //        .addListener(_onAuthProviderChange);
-  }
+  
 
 //  void _onAuthProviderChange() {
 //    _getUserPrefs();
@@ -150,7 +155,7 @@ class _HomeScreenState extends State<HomeScreen> {
 //    }
 //  }
 
-  void _listenForNewMessages() {
+  void _listenForNewMessages(context) {
     Timer.periodic(Duration(seconds: 15), (timer) async {
       print("Trying to get messages");
       final currentUserUid = FirebaseAuth.instance.currentUser?.uid;
@@ -168,8 +173,7 @@ class _HomeScreenState extends State<HomeScreen> {
               .get();
           if (querySnapshot.docs.isNotEmpty && !_notificationShown) {
             String senderId = querySnapshot.docs[0]['senderId'];
-            showNotificationSnackBar(
-                context, senderId); // Pass senderId to showNotificationSnackBar
+            showNotificationSnackBar(context, senderId); // Pass senderId to showNotificationSnackBar
             _notificationShown = true;
             Timer(Duration(seconds: 30), () {
               setState(() {
@@ -195,7 +199,7 @@ class _HomeScreenState extends State<HomeScreen> {
         action: SnackBarAction(
           label: 'Open Chat',
           onPressed: () {
-            _openChatWith(senderId, FirebaseAuth.instance.currentUser!.uid);
+            _openChatWith(FirebaseAuth.instance.currentUser!.uid,senderId);
           },
         ),
       ),
