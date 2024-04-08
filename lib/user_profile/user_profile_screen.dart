@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:bazapp/firebase/auth_provider.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
@@ -8,12 +7,13 @@ import 'package:image_picker/image_picker.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 class UserProfileScreen extends StatefulWidget {
+  const UserProfileScreen({super.key});
+
   @override
   _UserProfilePageState createState() => _UserProfilePageState();
 }
 
 class _UserProfilePageState extends State<UserProfileScreen> {
-
   Future<void> _changeProfilePicture(BZAuthProvider authProvider) async {
     final picker = ImagePicker();
 
@@ -65,108 +65,83 @@ class _UserProfilePageState extends State<UserProfileScreen> {
     return compressedImage;
   }
 
-  Future<String?> getURLByUserID(String displayName) async {
-    try {
-      final querySnapshot = await FirebaseFirestore.instance
-          .collection('users')
-          .where('displayName', isEqualTo: displayName)
-          .limit(1)
-          .get();
-
-      if (querySnapshot.docs.isNotEmpty) {
-        // Assuming the field containing the URL is named 'profileUrl'
-        final url = querySnapshot.docs.first.get('icon') as String?;
-        return url;
-      } else {
-        return null;
-      }
-    } catch (e) {
-      print('Error getting URL by UID: $e');
-      return null;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<BZAuthProvider>(context);
     final user = authProvider.user;
 
-    return FutureBuilder<String?>(
-      future: getURLByUserID(user!.displayName),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          // Show a loading indicator while fetching the URL
-          return CircularProgressIndicator();
-        } else if (snapshot.hasError) {
-          // Show an error message if fetching the URL fails
-          return Text('Error: ${snapshot.error}');
-        } else {
-          // Once the URL is fetched successfully, use it to display the profile picture
-          final url = snapshot.data ?? ''; // Use empty string if URL is null
-          return Scaffold(
-            body: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  GestureDetector(
-                    onTap: () {
-                      // Handle tapping the profile picture to change it
-                      _changeProfilePicture(authProvider);
-                    },
-                    child: ClipOval(
-                      child: CircleAvatar(
-                        radius: 80,
-                        backgroundImage:
-                            url.isEmpty ? null : NetworkImage(url),
-                        backgroundColor:
-                            Colors.grey, // Use a default background color
-                      ),
-                    ),
+    if (user == null) {
+      // Show a loading indicator while fetching the URL
+      return const Text("An Unknown Error Occurred");
+    } else {
+      // Once the URL is fetched successfully, use it to display the profile picture
+      final url = user.icon; // Use empty string if URL is null
+      return Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              GestureDetector(
+                onTap: () {
+                  // Handle tapping the profile picture to change it
+                  _changeProfilePicture(authProvider);
+                },
+                child: ClipOval(
+                  child: CircleAvatar(
+                    radius: 80,
+                    backgroundImage: url.isEmpty ? null : NetworkImage(url),
+                    backgroundColor:
+                        Colors.grey, // Use a default background color
                   ),
-                  SizedBox(height: 20),
-                  Container(
-                    child: Text(
-                      user.displayName,
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                  Container(
-                    child: Text(
-                      user.email,
-                      style: TextStyle(fontSize: 16, color: Colors.grey),
-                    ),
-                  ),
-                  SizedBox(height: 30),
-                  TextButton(
-                    onPressed: () {
-                      Provider.of<BZAuthProvider>(context, listen: false)
-                          .resetPassword(user.email);
-                      Fluttertoast.showToast(
-                        msg: 'Password Reset Email Sent!',
-                        toastLength: Toast.LENGTH_SHORT,
-                  );
-                    },
-                    child: const Text(
-                      'Reset Password',
-                      style: TextStyle(fontSize: 20, color: Colors.black, fontWeight: FontWeight.normal),
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      Provider.of<BZAuthProvider>(context, listen: false)
-                          .signOut();
-                    },
-                    child: const Text(
-                      'Sign Out',
-                      style: TextStyle(fontSize: 20, color: Colors.black, fontWeight: FontWeight.normal),
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
-          );
-        }
-      },
-    );
+              SizedBox(height: 20),
+              Container(
+                child: Text(
+                  user.displayName,
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+              ),
+              Container(
+                child: Text(
+                  user.email,
+                  style: TextStyle(fontSize: 16, color: Colors.grey),
+                ),
+              ),
+              SizedBox(height: 30),
+              TextButton(
+                onPressed: () {
+                  Provider.of<BZAuthProvider>(context, listen: false)
+                      .resetPassword(user.email);
+                  Fluttertoast.showToast(
+                    msg: 'Password Reset Email Sent!',
+                    toastLength: Toast.LENGTH_SHORT,
+                  );
+                },
+                child: const Text(
+                  'Reset Password',
+                  style: TextStyle(
+                      fontSize: 20,
+                      color: Colors.black,
+                      fontWeight: FontWeight.normal),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  Provider.of<BZAuthProvider>(context, listen: false).signOut();
+                },
+                child: const Text(
+                  'Sign Out',
+                  style: TextStyle(
+                      fontSize: 20,
+                      color: Colors.black,
+                      fontWeight: FontWeight.normal),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
   }
 }

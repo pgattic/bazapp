@@ -29,7 +29,7 @@ class UserProfileSmall extends StatelessWidget {
         final userData = snapshot.data!.data() as Map<String, dynamic>;
         final String displayName = userData['displayName'];
         final String email = userData['email'];
-        final String iconUrl = userData['icon'];
+        final String iconUrl = userData['photoUrl'];
 
         return Row(
           crossAxisAlignment: CrossAxisAlignment.start,

@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:bazapp/event/event.dart';
 import 'package:bazapp/event/event_type.dart';
+import 'package:bazapp/planner/planner_view.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -13,8 +14,10 @@ class BZAuthProvider extends ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   User? _user;
+  UserPreferences? _userPreferences;
 
   User? get user => _user;
+  UserPreferences? get userPreferences => _userPreferences;
   Future<String?> getuser() async{
     return FirebaseAuth.instance.currentUser?.uid;
   }
@@ -41,16 +44,27 @@ class BZAuthProvider extends ChangeNotifier {
         await _firestore.collection('users').doc(user.uid).set({
           'email': email,
           'displayName': displayName,
-          'icon': genericIconUrl,
+          'photoURL': genericIconUrl,
+        });
+
+        // Add user-prefs to Firestore
+        await FirebaseFirestore.instance.collection('user-prefs').add({
+          'user-id': user.uid,
+          'is-dark-mode': false,
+          'calendar-view': 'day',
         });
 
         _user = User(
-            uid: user.uid,
-            email: email,
-            displayName: displayName,
-            icon: genericIconUrl,
-            eventIds: [], // Assign the generic icon URL
-            chats: []);
+          uid: user.uid,
+          email: email,
+          displayName: displayName,
+          icon: genericIconUrl,
+        );
+        
+        _userPreferences = UserPreferences(
+          isDarkMode: false,
+          calendarViewType: CalendarViewType.day,
+        );
         notifyListeners();
       }
     } catch (e) {
@@ -75,13 +89,13 @@ class BZAuthProvider extends ChangeNotifier {
 
       if (user != null) {
         _user = User(
-            uid: user.uid,
-            email: email,
-            displayName:
-                user.displayName ?? '', // You can handle null display name
-            icon: '', // You can assign an icon if needed
-            eventIds: [], // You can assign event IDs if needed
-            chats: []);
+          uid: user.uid,
+          email: email,
+          displayName:
+              user.displayName ?? '', // You can handle null display name
+          icon: user.photoURL ?? '', // You can assign an icon if needed
+        );
+        _userPreferences = await getUserPrefs();
         notifyListeners();
         print('Login successful');
       }
@@ -130,7 +144,7 @@ class BZAuthProvider extends ChangeNotifier {
 
       // Update user's icon in Firestore
       await _firestore.collection('users').doc(user.uid).update({
-        'icon': downloadUrl,
+        'photoURL': downloadUrl,
       });
 
       // Update local user object
@@ -138,6 +152,38 @@ class BZAuthProvider extends ChangeNotifier {
       notifyListeners();
 
       return downloadUrl;
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  Future<UserPreferences> getUserPrefs() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        throw Exception('User not logged in');
+      }
+      final doc = await _firestore.collection('user-prefs').where('user-id', isEqualTo: user.uid).get();
+      final userPrefs = doc.docs.first;
+      return UserPreferences(
+        calendarViewType: CalendarViewType.fromString(userPrefs['calendar-view'] as String),
+        isDarkMode: userPrefs['is-dark-mode'] as bool
+      );
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  Future<void> updateUserPrefs(UserPreferences userPrefs) async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        throw Exception('User not logged in');
+      }
+      await _firestore.collection('user-prefs').doc(user.uid).update({
+        'calendar-view': userPrefs.calendarViewType.toString(),
+        'is-dark-mode': userPrefs.isDarkMode
+      });
     } catch (e) {
       throw e;
     }
@@ -513,25 +559,24 @@ class User {
   String email;
   String displayName;
   String icon;
-  List<String> eventIds;
-  List<String> chats; // Change this to a List<String>
 
   User({
     required this.uid,
     required this.email,
     required this.displayName,
     required this.icon,
-    required this.eventIds,
-    List<String>? chats, // Change the type here
-  }) : chats = chats ?? [];
-
-  setEventIds(List<String> eventIds, {required String value}) {
-    eventIds.add(value);
-  }
+  });
 
   iconURL({required String newIconURL}) {
     icon = newIconURL;
   }
+}
+
+class UserPreferences {
+  bool isDarkMode = false;
+  CalendarViewType calendarViewType = CalendarViewType.day;
+
+  UserPreferences({required this.isDarkMode, required this.calendarViewType});
 }
 
 class Message {
