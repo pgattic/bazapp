@@ -3,14 +3,14 @@ import 'package:bazapp/firebase/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class PreferencesView extends StatefulWidget {
-   PreferencesView({Key? key}) : super(key: key);
+class PreferencesDialog extends StatefulWidget {
+   PreferencesDialog({Key? key}) : super(key: key);
 
   @override
-  State<PreferencesView> createState() => _PreferencesViewState();
+  State<PreferencesDialog> createState() => _PreferencesDialogState();
 }
 
-class _PreferencesViewState extends State<PreferencesView> {
+class _PreferencesDialogState extends State<PreferencesDialog> {
   UserPreferences? userPreferences;
 
   @override
@@ -34,9 +34,8 @@ class _PreferencesViewState extends State<PreferencesView> {
   void _fetchPrefs() async {
     try {
       final authProvider = Provider.of<BZAuthProvider>(context, listen: false);
-      UserPreferences prefs = await authProvider.getUserPrefs();
       setState(() {
-        userPreferences = prefs;
+        userPreferences = authProvider.userPreferences;
       });
     } catch (e) {
       print('Error fetching events: $e');
@@ -45,30 +44,30 @@ class _PreferencesViewState extends State<PreferencesView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Preferences"),
-      ),
-      body: Container(
-        padding: const EdgeInsets.all(16.0),
-        child: Column (
-          children: [
-            Row(
-              children: [
-                const Text("Dark Mode:", style: TextStyle(fontSize: 16)), //Theme.of(context).textTheme.labelLarge
-                if (userPreferences == null)
-                  const CircularProgressIndicator()
-                else
-                  Checkbox(
-                    value: userPreferences!.isDarkMode,
-                    onChanged: (value) {
-                      userPreferences!.isDarkMode = value!;
-                      _setUserPrefs();
-                    },
-                  ),
-              ],
-            )
-          ]
+    return AlertDialog(
+      title: const Text("Preferences"),
+      content: SingleChildScrollView(
+        child: Container(
+          padding: const EdgeInsets.all(16.0),
+          child: Column (
+            children: [
+              Row(
+                children: [
+                  const Text("Dark Mode:", style: TextStyle(fontSize: 16)), //Theme.of(context).textTheme.labelLarge
+                  if (userPreferences == null)
+                    const CircularProgressIndicator()
+                  else
+                    Checkbox(
+                      value: userPreferences!.isDarkMode,
+                      onChanged: (value) {
+                        userPreferences!.isDarkMode = value!;
+                        _setUserPrefs();
+                      },
+                    ),
+                ],
+              )
+            ]
+          ),
         ),
       ),
     );

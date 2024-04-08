@@ -1,3 +1,4 @@
+import 'package:bazapp/app_colors.dart';
 import 'package:bazapp/firebase/firebase_options.dart';
 import 'package:bazapp/home.dart';
 import 'package:bazapp/login/login_page.dart';
@@ -54,6 +55,9 @@ class MyApp extends StatelessWidget {
  
     return MaterialApp(
       title: 'Bazapp',
+      theme: AppColors.lightMode,
+      darkTheme: AppColors.darkMode,
+      themeMode: ThemeMode.system,
       home: Consumer<BZAuthProvider>(
         builder: (context, authProvider, child) {
           final user = authProvider.user;
@@ -67,7 +71,6 @@ class MyApp extends StatelessWidget {
           if (user != null) {
             _saveDeviceTokenToFirestore();
             final userPrefs = authProvider.userPreferences;
-            print("YERERHDIUFHFIEUIJFO SJFSFOIFJ OI E ${userPrefs!.isDarkMode}");
             return HomeScreen(user: user, userPreferences: userPrefs); // Pass the user to HomeScreen
           } else {
             return LoginPage(); // Return LoginPage when the user is not authenticated

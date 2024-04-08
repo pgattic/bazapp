@@ -36,9 +36,8 @@ class _HomeScreenState extends State<HomeScreen> {
       home: Scaffold(
         appBar: AppBar(
           title: GestureDetector(
-            // Wrap title with GestureDetector
             onTap: () {
-              // Trigger notification on title click
+              // Trigger test notification on title click
               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                 content: Text('You have a new message!'),
                 duration: Duration(seconds: 5),
@@ -53,12 +52,12 @@ class _HomeScreenState extends State<HomeScreen> {
             IconButton(
               icon: const Icon(Icons.settings),
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => PreferencesView(),
-                  )
-                );
+                showDialog(
+                  context: context,
+                  builder:(context) {
+                    return PreferencesDialog();
+                  },
+                ).then((_) => setState(() {})); // Refresh the screen so the settings changes take effect
               },
             ),
           ],

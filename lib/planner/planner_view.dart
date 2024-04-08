@@ -1,5 +1,6 @@
 import 'package:bazapp/event/event.dart';
 import 'package:bazapp/event/create_event_dialog.dart';
+import 'package:bazapp/time_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:calendar_view/calendar_view.dart';
 import 'package:bazapp/firebase/auth_provider.dart';
@@ -15,6 +16,7 @@ class CalendarScreen extends StatefulWidget {
 class _CalendarScreenState extends State<CalendarScreen> {
   List<CustomEvent> feedEventList = [];
   CalendarViewType selectedView = CalendarViewType.day;
+  String headerText = "Calendar";
 
   @override
   void initState() {
@@ -53,7 +55,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
       controller: EventController<Object?>(), // Provide the controller here
       child: Scaffold(
         appBar: AppBar(
-          title: const Text("Planner"),
+          title: Text(headerText),
           actions: [
             DropdownButton<CalendarViewType>(
               value: selectedView,
@@ -115,6 +117,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   },
                   heightPerMinute: 1,
                   startHour: 5,
+                  backgroundColor: Colors.transparent,
+                  dayTitleBuilder: (date) {
+                    headerText = date.toString();
+                    return const SizedBox();
+                  },
                 );
               case CalendarViewType.week:
                 return WeekView(
@@ -124,6 +131,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   },
                   heightPerMinute: 1,
                   startHour: 5,
+                  backgroundColor: Colors.transparent,
                 );
               case CalendarViewType.month:
                 return MonthView(

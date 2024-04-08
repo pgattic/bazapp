@@ -95,8 +95,11 @@ class BZAuthProvider extends ChangeNotifier {
               user.displayName ?? '', // You can handle null display name
           icon: user.photoURL ?? '', // You can assign an icon if needed
         );
-        _userPreferences = await getUserPrefs();
-        print(_userPreferences!.isDarkMode);
+        final doc = await _firestore.collection('user-prefs').doc(user.uid).get();
+        _userPreferences = UserPreferences(
+          calendarViewType: CalendarViewType.fromString(doc['calendar-view'] as String),
+          isDarkMode: doc['is-dark-mode'] as bool
+        );
         notifyListeners();
         print('Login successful');
       }
@@ -153,22 +156,6 @@ class BZAuthProvider extends ChangeNotifier {
       notifyListeners();
 
       return downloadUrl;
-    } catch (e) {
-      throw e;
-    }
-  }
-
-  Future<UserPreferences> getUserPrefs() async {
-    try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
-        throw Exception('User not logged in');
-      }
-      final doc = await _firestore.collection('user-prefs').doc(user.uid).get();
-      return UserPreferences(
-        calendarViewType: CalendarViewType.fromString(doc['calendar-view'] as String),
-        isDarkMode: doc['is-dark-mode'] as bool
-      );
     } catch (e) {
       throw e;
     }
