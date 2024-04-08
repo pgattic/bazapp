@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:bazapp/app_colors.dart';
 import 'package:bazapp/messages/chat_screen.dart';
 import 'package:bazapp/messages/messages_screen.dart';
 import 'package:bazapp/preferences/preferences_view.dart';
@@ -14,7 +15,8 @@ import 'package:bazapp/firebase/auth_provider.dart' as fire;
 
 class HomeScreen extends StatefulWidget {
   final fire.User user; // Receive user information
-  const HomeScreen({Key? key, required this.user}) : super(key: key);
+  final fire.UserPreferences? userPreferences; // Receive user information
+  const HomeScreen({Key? key, required this.user, required this.userPreferences}) : super(key: key);
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -26,38 +28,44 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: GestureDetector(
-          // Wrap title with GestureDetector
-          onTap: () {
-            // Trigger notification on title click
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text('You have a new message!'),
-              duration: Duration(seconds: 5),
-              behavior: SnackBarBehavior.floating,
-              margin: EdgeInsets.only(top: 64.0),
-            ));
-            _listenForNewMessages();
-          },
-          child: const Text('Bazapp'),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const PreferencesView(),
-                )
-              );
+    bool? isDarkMode = widget.userPreferences?.isDarkMode;
+    return MaterialApp(
+      theme: AppColors.lightMode,
+      darkTheme: AppColors.darkMode,
+      themeMode: isDarkMode == null ? ThemeMode.system : isDarkMode ? ThemeMode.dark : ThemeMode.light,
+      home: Scaffold(
+        appBar: AppBar(
+          title: GestureDetector(
+            // Wrap title with GestureDetector
+            onTap: () {
+              // Trigger notification on title click
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                content: Text('You have a new message!'),
+                duration: Duration(seconds: 5),
+                behavior: SnackBarBehavior.floating,
+                margin: EdgeInsets.only(top: 64.0),
+              ));
+              _listenForNewMessages();
             },
+            child: const Text('Bazapp'),
           ),
-        ],
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.settings),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => PreferencesView(),
+                  )
+                );
+              },
+            ),
+          ],
+        ),
+        body: _buildContent(), // Display different content based on selected icon
+        bottomNavigationBar: _buildBottomNavigationBar(),
       ),
-      body: _buildContent(), // Display different content based on selected icon
-      bottomNavigationBar: _buildBottomNavigationBar(),
     );
   }
 
@@ -121,7 +129,27 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     // Listen for updates to the messages and show a notification
     _listenForNewMessages();
+//    Provider.of<BZAuthProvider>(context, listen: false)
+//        .addListener(_onAuthProviderChange);
   }
+
+//  void _onAuthProviderChange() {
+//    _getUserPrefs();
+//  }
+//
+//  void _getUserPrefs() async {
+//    try {
+//      final authProvider = Provider.of<BZAuthProvider>(context, listen: false);
+//      UserPreferences prefs = await authProvider.getUserPrefs();
+//      print("YEET YEET YEET YEET YEET YEET ${prefs.isDarkMode}");
+//      setState(() {
+//        _userPreferences = prefs;
+//        _darkMode = prefs.isDarkMode;
+//      });
+//    } catch (e) {
+//      print('Error fetching events: $e');
+//    }
+//  }
 
   void _listenForNewMessages() {
     Timer.periodic(Duration(seconds: 15), (timer) async {

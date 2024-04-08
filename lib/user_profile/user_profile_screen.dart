@@ -122,7 +122,6 @@ class _UserProfilePageState extends State<UserProfileScreen> {
                   'Reset Password',
                   style: TextStyle(
                       fontSize: 20,
-                      color: Colors.black,
                       fontWeight: FontWeight.normal),
                 ),
               ),
@@ -134,7 +133,6 @@ class _UserProfilePageState extends State<UserProfileScreen> {
                   'Sign Out',
                   style: TextStyle(
                       fontSize: 20,
-                      color: Colors.black,
                       fontWeight: FontWeight.normal),
                 ),
               ),

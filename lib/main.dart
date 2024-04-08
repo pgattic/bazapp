@@ -54,9 +54,6 @@ class MyApp extends StatelessWidget {
  
     return MaterialApp(
       title: 'Bazapp',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
       home: Consumer<BZAuthProvider>(
         builder: (context, authProvider, child) {
           final user = authProvider.user;
@@ -69,7 +66,9 @@ class MyApp extends StatelessWidget {
           // Check if the user is authenticated
           if (user != null) {
             _saveDeviceTokenToFirestore();
-            return HomeScreen(user: user); // Pass the user to HomeScreen
+            final userPrefs = authProvider.userPreferences;
+            print("YERERHDIUFHFIEUIJFO SJFSFOIFJ OI E ${userPrefs!.isDarkMode}");
+            return HomeScreen(user: user, userPreferences: userPrefs); // Pass the user to HomeScreen
           } else {
             return LoginPage(); // Return LoginPage when the user is not authenticated
           }

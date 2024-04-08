@@ -28,6 +28,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
     final userPrefs = authProvider.userPreferences;
     selectedView = userPrefs!.calendarViewType;
+
   }
 
   void _onAuthProviderChange() {
