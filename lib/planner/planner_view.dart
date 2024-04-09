@@ -58,40 +58,29 @@ class _CalendarScreenState extends State<CalendarScreen> {
         appBar: AppBar(
           title: Text(headerText),
           actions: [
-            DropdownButton<CalendarViewType>(
-              value: selectedView,
-              onChanged: (value) {
-                if (value == null) return;
-                setState(() {
-                  selectedView = value;
-                });
-              },
-              items: const [
-                DropdownMenuItem<CalendarViewType>(
-                  value: CalendarViewType.day,
-                  child: Row(
-                    children: [
-                      Text("Day View"),
-                    ],
+            SizedBox(
+              child: SegmentedButton<CalendarViewType>(
+                selected: <CalendarViewType>{selectedView},
+                onSelectionChanged: (value) {
+                  setState(() {
+                    selectedView = value.first;
+                  });
+                },
+                segments: const [
+                  ButtonSegment<CalendarViewType>(
+                    value: CalendarViewType.day,
+                    icon: Icon(Icons.calendar_view_day),
                   ),
-                ),
-                DropdownMenuItem<CalendarViewType>(
-                  value: CalendarViewType.week,
-                  child: Row(
-                    children: [
-                      Text("Week View"),
-                    ],
+                  ButtonSegment<CalendarViewType>(
+                    value: CalendarViewType.week,
+                    icon: Icon(Icons.calendar_view_week),
                   ),
-                ),
-                DropdownMenuItem<CalendarViewType>(
-                  value: CalendarViewType.month,
-                  child: Row(
-                    children: [
-                      Text("Month View"),
-                    ],
+                  ButtonSegment<CalendarViewType>(
+                    value: CalendarViewType.month,
+                    icon: Icon(Icons.calendar_view_month),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ],
         ),

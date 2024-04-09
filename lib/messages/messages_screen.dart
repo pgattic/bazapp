@@ -1,6 +1,7 @@
 import 'package:bazapp/user_profile/user_profile_small.dart';
 import 'package:bazapp/messages/chat_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart' as fire;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../firebase/auth_provider.dart';
@@ -14,6 +15,7 @@ class MessagesScreen extends StatefulWidget {
 }
 
 class _MessagesScreenState extends State<MessagesScreen> {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final TextEditingController searchController = TextEditingController();
   bool isSearchBarFocused = false;
 
@@ -67,7 +69,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
 
   Widget _buildUserDropDown() {
     return StreamBuilder<List<String>>(
-      stream: MessageService().getUsersByDisplayName(
+      stream: getUsersByDisplayName(
         searchController.text.isNotEmpty
             ? searchController.text
             : '', // Pass an empty string to get all users when the search is empty
@@ -89,9 +91,9 @@ class _MessagesScreenState extends State<MessagesScreen> {
                 String userName = users[index];
                 return GestureDetector(
                   onTap: () async {
-                    String? userId = await MessageService().getCurrentUserId();
+                    String? userId = getCurrentUserId();
                     String? otherUserId =
-                        await MessageService().getUserIdByDisplayName(userName);
+                        await getUserIdByDisplayName(userName);
 
                     _openChatWith(userId!, otherUserId!);
                   },
@@ -108,6 +110,76 @@ class _MessagesScreenState extends State<MessagesScreen> {
         }
       },
     );
+  }
+
+  Stream<List<String>> getUsersByDisplayName([String? displayName]) {
+    if (displayName == null || displayName.isEmpty) {
+      // Return all users when displayName is null or empty
+      return _firestore.collection('users').snapshots().map((snapshot) {
+        return snapshot.docs.map((doc) {
+          return doc['displayName'] as String;
+        }).toList();
+      });
+    } else {
+      // Return filtered users based on displayName
+      return _firestore
+          .collection('users')
+          .where('displayName', isGreaterThanOrEqualTo: displayName)
+          .where('displayName', isLessThan: displayName + 'z')
+          .snapshots()
+          .map((snapshot) {
+        return snapshot.docs.map((doc) {
+          return doc['displayName'] as String;
+        }).toList();
+      });
+    }
+  }
+
+
+  Future<String?> getDisplayNameByUserId(String? userId) async {
+    try {
+      DocumentSnapshot userSnapshot =
+          await _firestore.collection('users').doc(userId).get();
+
+      if (userSnapshot.exists) {
+        // Return the display name of the user with the given UID
+        return userSnapshot['displayName'] as String?;
+      } else {
+        // Return null if no user is found with the given UID
+        return null;
+      }
+    } catch (e) {
+      // Handle errors, such as Firestore query errors
+      print('Error getting display name by user ID: $e');
+      return null;
+    }
+  }
+
+  Future<String?> getUserIdByDisplayName(String displayName) async {
+    try {
+      QuerySnapshot querySnapshot = await _firestore
+          .collection('users')
+          .where('displayName', isEqualTo: displayName)
+          .limit(1)
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        // Return the UID of the first user found with the given display name
+        return querySnapshot.docs.first.id;
+      } else {
+        // Return null if no user is found with the given display name
+        return null;
+      }
+    } catch (e) {
+      // Handle errors, such as Firestore query errors
+      print('Error getting user ID by display name: $e');
+      return null;
+    }
+  }
+
+  String? getCurrentUserId() {
+    final user = fire.FirebaseAuth.instance.currentUser;
+    return user?.uid;
   }
 
   List<Widget> chatButtons = [];

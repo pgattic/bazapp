@@ -5,7 +5,7 @@ class TimeFunctions {
     var hour = (dateTime.hour - 1) % 12 + 1;
     var min = dateTime.minute;
     var minString = min < 10 ? '0$min' : min.toString();
-    var sign = dateTime.hour > 11 ? 'pm' : 'am';
+    var sign = dateTime.hour > 11 ? 'PM' : 'AM';
     return '$hour:$minString $sign';
   }
 
