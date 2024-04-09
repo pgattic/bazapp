@@ -97,7 +97,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildBottomNavigationBar() {
     return BottomNavigationBar(
       type: BottomNavigationBarType.fixed,
-      selectedItemColor: Colors.blue, // Customize color as needed
+      selectedItemColor: widget.userPreferences?.isDarkMode ?? false ? AppColors.darkMode.buttonTheme.colorScheme?.primary : AppColors.lightMode.buttonTheme.colorScheme?.primary, // Customize color as needed
       unselectedItemColor: Colors.grey, // Customize color as needed
       currentIndex: _currentIndex,
       onTap: (index) {

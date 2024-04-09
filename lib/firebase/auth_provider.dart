@@ -38,7 +38,7 @@ class BZAuthProvider extends ChangeNotifier {
         await user.updateDisplayName(displayName);
 
         // Assign a generic example icon URL
-        const String genericIconUrl = 'https://example.com/generic-icon.png';
+        const String genericIconUrl = 'https://cdn-icons-png.freepik.com/512/6813/6813762.png';
 
         // Create a user document in Firestore with the generic icon URL
         await _firestore.collection('users').doc(user.uid).set({

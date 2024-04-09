@@ -182,13 +182,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
           ),
           Expanded(
             child: ListView(
-              children: chatButtons
-                  .map((chatButton) => Padding(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        child: chatButton,
-                      ))
-                  .toList(),
+              children: chatButtons.toList(),
             ),
           ),
         ],

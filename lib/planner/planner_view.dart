@@ -1,6 +1,6 @@
+import 'package:bazapp/app_colors.dart';
 import 'package:bazapp/event/event.dart';
 import 'package:bazapp/event/create_event_dialog.dart';
-import 'package:bazapp/time_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:calendar_view/calendar_view.dart';
 import 'package:bazapp/firebase/auth_provider.dart';
@@ -16,6 +16,7 @@ class CalendarScreen extends StatefulWidget {
 class _CalendarScreenState extends State<CalendarScreen> {
   List<CustomEvent> feedEventList = [];
   CalendarViewType selectedView = CalendarViewType.day;
+  ThemeData colors = AppColors.lightMode;
   String headerText = "Calendar";
 
   @override
@@ -30,7 +31,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
     final userPrefs = authProvider.userPreferences;
     selectedView = userPrefs!.calendarViewType;
-
+    colors = userPrefs.isDarkMode ? AppColors.darkMode : AppColors.lightMode;
   }
 
   void _onAuthProviderChange() {
@@ -118,10 +119,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   heightPerMinute: 1,
                   startHour: 5,
                   backgroundColor: Colors.transparent,
-                  dayTitleBuilder: (date) {
-                    headerText = date.toString();
-                    return const SizedBox();
-                  },
+                  headerStyle: HeaderStyle(
+                    decoration: BoxDecoration(color: colors.splashColor),
+                  ),
                 );
               case CalendarViewType.week:
                 return WeekView(
@@ -132,6 +132,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   heightPerMinute: 1,
                   startHour: 5,
                   backgroundColor: Colors.transparent,
+                  headerStyle: HeaderStyle(
+                    decoration: BoxDecoration(color: colors.splashColor),
+                  ),
                 );
               case CalendarViewType.month:
                 return MonthView(
@@ -139,6 +142,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     final CustomEvent event = events.event as CustomEvent;
                     event.displayBottomSheet(context);
                   },
+                  headerStyle: HeaderStyle(
+                    decoration: BoxDecoration(color: colors.splashColor),
+                  ),
                 );
             }
           },
