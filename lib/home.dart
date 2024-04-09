@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:bazapp/app_colors.dart';
+import 'package:bazapp/firebase/auth_provider.dart';
 import 'package:bazapp/messages/chat_screen.dart';
 import 'package:bazapp/messages/messages_screen.dart';
 import 'package:bazapp/preferences/preferences_view.dart';
@@ -12,9 +13,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:bazapp/firebase/auth_provider.dart' as fire;
+import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
-  final fire.User user; // Receive user information
+  final fire.BZUser user; // Receive user information
   final fire.UserPreferences? userPreferences; // Receive user information
   const HomeScreen({Key? key, required this.user, required this.userPreferences}) : super(key: key);
 
@@ -199,17 +201,18 @@ class _HomeScreenState extends State<HomeScreen> {
         action: SnackBarAction(
           label: 'Open Chat',
           onPressed: () {
-            _openChatWith(FirebaseAuth.instance.currentUser!.uid,senderId);
+            _openChatWith(senderId);
           },
         ),
       ),
     );
   }
 
-  void _openChatWith(String userId, String otherUserId) {
+  void _openChatWith(String otherUserId) async {
+    BZUser otherUser = await Provider.of<BZAuthProvider>(context, listen: false).getUserById(otherUserId);
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => ChatScreen(recipientUid: otherUserId),
+        builder: (context) => ChatScreen(recipient: otherUser),
       ),
     );
   }

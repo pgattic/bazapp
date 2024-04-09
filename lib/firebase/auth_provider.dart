@@ -13,10 +13,10 @@ import 'package:firebase_storage/firebase_storage.dart';
 class BZAuthProvider extends ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  User? _user;
+  BZUser? _user;
   UserPreferences? _userPreferences;
 
-  User? get user => _user;
+  BZUser? get user => _user;
   UserPreferences? get userPreferences => _userPreferences;
   Future<String?> getuser() async{
     return FirebaseAuth.instance.currentUser?.uid;
@@ -53,7 +53,7 @@ class BZAuthProvider extends ChangeNotifier {
           'calendar-view': 'day',
         });
 
-        _user = User(
+        _user = BZUser(
           uid: user.uid,
           email: email,
           displayName: displayName,
@@ -73,6 +73,16 @@ class BZAuthProvider extends ChangeNotifier {
     }
   }
 
+  Future<BZUser> getUserById(String id) async {
+    final doc = await _firestore.collection('users').doc(id).get();
+    return BZUser(
+      uid: doc.id,
+      email: doc['email'] as String,
+      displayName: doc['displayName'] as String,
+      icon: doc['photoURL'] as String,
+    );
+  }
+
   // Sign out function
   Future<void> signOut() async {
     await _auth.signOut();
@@ -88,7 +98,7 @@ class BZAuthProvider extends ChangeNotifier {
       final user = authResult.user;
 
       if (user != null) {
-        _user = User(
+        _user = BZUser(
           uid: user.uid,
           email: email,
           displayName:
@@ -541,13 +551,13 @@ class BZAuthProvider extends ChangeNotifier {
 
 }
 
-class User {
+class BZUser {
   String uid;
   String email;
   String displayName;
   String icon;
 
-  User({
+  BZUser({
     required this.uid,
     required this.email,
     required this.displayName,

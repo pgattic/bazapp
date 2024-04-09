@@ -7,7 +7,7 @@ import 'package:provider/provider.dart';
 import '../firebase/auth_provider.dart';
 
 class MessagesScreen extends StatefulWidget {
-  final User user; // Accept user information
+  final BZUser user; // Accept user information
   MessagesScreen({Key? key, required this.user}) : super(key: key);
 
   @override
@@ -68,8 +68,8 @@ class _MessagesScreenState extends State<MessagesScreen> {
   }
 
   Widget _buildUserDropDown() {
-    return StreamBuilder<List<String>>(
-      stream: getUsersByDisplayName(
+    return StreamBuilder<List<BZUser>>(
+      stream: searchUsersByDisplayName(
         searchController.text.isNotEmpty
             ? searchController.text
             : '', // Pass an empty string to get all users when the search is empty
@@ -82,26 +82,23 @@ class _MessagesScreenState extends State<MessagesScreen> {
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return Container(); // No results, return an empty container
         } else {
-          List<String> users = snapshot.data!;
+          List<BZUser> users = snapshot.data!;
           return Container(
             height: 160, // Limit the height to show at most 4 users
             child: ListView.builder(
               itemCount: users.length > 4 ? 4 : users.length,
               itemBuilder: (context, index) {
-                String userName = users[index];
                 return GestureDetector(
                   onTap: () async {
-                    String? userId = getCurrentUserId();
-                    String? otherUserId =
-                        await getUserIdByDisplayName(userName);
-
-                    _openChatWith(userId!, otherUserId!);
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => ChatScreen(recipient: users[index]),
+                      ),
+                    );
                   },
                   child: Card(
                     margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    child: ListTile(
-                      title: Text(userName),
-                    ),
+                    child: UserProfileSmall(userId: users[index].uid),
                   ),
                 );
               },
@@ -112,70 +109,39 @@ class _MessagesScreenState extends State<MessagesScreen> {
     );
   }
 
-  Stream<List<String>> getUsersByDisplayName([String? displayName]) {
-    if (displayName == null || displayName.isEmpty) {
-      // Return all users when displayName is null or empty
+  Stream<List<BZUser>> searchUsersByDisplayName(String displayName) {
+    if (displayName.isEmpty) {
+      // Return all users when displayName is empty
       return _firestore.collection('users').snapshots().map((snapshot) {
         return snapshot.docs.map((doc) {
-          return doc['displayName'] as String;
+          return BZUser(
+            uid: doc.id,
+            displayName: doc['displayName'] as String,
+            email: doc['email'] as String,
+            icon: doc['photoURL'] as String,
+          );
         }).toList();
       });
     } else {
       // Return filtered users based on displayName
-      return _firestore
+      var query = _firestore
           .collection('users')
           .where('displayName', isGreaterThanOrEqualTo: displayName)
           .where('displayName', isLessThan: displayName + 'z')
-          .snapshots()
-          .map((snapshot) {
+          .snapshots();
+      return query.map((snapshot) {
         return snapshot.docs.map((doc) {
-          return doc['displayName'] as String;
+          return BZUser(
+            uid: doc.id,
+            displayName: doc['displayName'] as String,
+            email: doc['email'] as String,
+            icon: doc['photoURL'] as String,
+          );
         }).toList();
       });
     }
   }
 
-
-  Future<String?> getDisplayNameByUserId(String? userId) async {
-    try {
-      DocumentSnapshot userSnapshot =
-          await _firestore.collection('users').doc(userId).get();
-
-      if (userSnapshot.exists) {
-        // Return the display name of the user with the given UID
-        return userSnapshot['displayName'] as String?;
-      } else {
-        // Return null if no user is found with the given UID
-        return null;
-      }
-    } catch (e) {
-      // Handle errors, such as Firestore query errors
-      print('Error getting display name by user ID: $e');
-      return null;
-    }
-  }
-
-  Future<String?> getUserIdByDisplayName(String displayName) async {
-    try {
-      QuerySnapshot querySnapshot = await _firestore
-          .collection('users')
-          .where('displayName', isEqualTo: displayName)
-          .limit(1)
-          .get();
-
-      if (querySnapshot.docs.isNotEmpty) {
-        // Return the UID of the first user found with the given display name
-        return querySnapshot.docs.first.id;
-      } else {
-        // Return null if no user is found with the given display name
-        return null;
-      }
-    } catch (e) {
-      // Handle errors, such as Firestore query errors
-      print('Error getting user ID by display name: $e');
-      return null;
-    }
-  }
 
   String? getCurrentUserId() {
     final user = fire.FirebaseAuth.instance.currentUser;
@@ -203,12 +169,13 @@ class _MessagesScreenState extends State<MessagesScreen> {
       // Only add unique users
       if (!uniqueUserIds.contains(otherUserId)) {
         uniqueUserIds.add(otherUserId);
+        BZUser otherUser = await Provider.of<BZAuthProvider>(context, listen: false).getUserById(otherUserId);
 
         chatButtons.add(
           TextButton(
             onPressed: () {
               Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) => ChatScreen(recipientUid: otherUserId),
+                builder: (context) => ChatScreen(recipient: otherUser),
               ));
             },
             style: ButtonStyle(
@@ -258,14 +225,6 @@ class _MessagesScreenState extends State<MessagesScreen> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  void _openChatWith(String userId, String otherUserId) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => ChatScreen(recipientUid: otherUserId),
       ),
     );
   }

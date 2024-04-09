@@ -1,30 +1,15 @@
 import 'dart:async';
+import 'package:bazapp/firebase/auth_provider.dart';
 import 'package:bazapp/messages/text_message.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
-class Message {
-  final String senderId;
-  final String recipientId;
-  final String text;
-  final DateTime timestamp;
-  final bool read; // Added 'read' field
-
-  Message({
-    required this.senderId,
-    required this.recipientId,
-    required this.text,
-    required this.timestamp,
-    required this.read,
-  });
-}
-
 class ChatScreen extends StatefulWidget {
-  final String recipientUid;
+  final BZUser recipient;
 
-  const ChatScreen({super.key, required this.recipientUid});
+  const ChatScreen({super.key, required this.recipient});
 
   @override
   _ChatScreenState createState() => _ChatScreenState();
@@ -47,9 +32,9 @@ class _ChatScreenState extends State<ChatScreen> {
     final user = _auth.currentUser;
     if (user != null) {
       final currentUserUid = user.uid;
-      chatId = currentUserUid.hashCode <= widget.recipientUid.hashCode
-          ? '$currentUserUid${widget.recipientUid}'
-          : '${widget.recipientUid}$currentUserUid';
+      chatId = currentUserUid.hashCode <= widget.recipient.uid.hashCode
+          ? '$currentUserUid${widget.recipient.uid}'
+          : '${widget.recipient.uid}$currentUserUid';
 
       // Start listening for new messages
       _messagesStream = _firestore
@@ -85,7 +70,7 @@ class _ChatScreenState extends State<ChatScreen> {
     try {
       await _firestore.collection('messages').add({
         'senderId': _auth.currentUser!.uid,
-        'recipientId': widget.recipientUid,
+        'recipientId': widget.recipient.uid,
         'text': text,
         'timestamp': DateTime.now(),
         'chatId': chatId,
@@ -100,7 +85,7 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Chat Screen'),
+        title: Text(widget.recipient.displayName),
       ),
       body: Column(
         children: [

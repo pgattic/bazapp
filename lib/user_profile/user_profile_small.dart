@@ -1,6 +1,7 @@
+import 'package:bazapp/firebase/auth_provider.dart';
 import 'package:bazapp/messages/chat_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
 
 class UserProfileSmall extends StatelessWidget {
   final String userId;
@@ -11,8 +12,8 @@ class UserProfileSmall extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<DocumentSnapshot>(
-      future: FirebaseFirestore.instance.collection('users').doc(userId).get(),
+    return FutureBuilder<BZUser>(
+      future: Provider.of<BZAuthProvider>(context, listen: false).getUserById(userId),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const CircularProgressIndicator();
@@ -26,16 +27,13 @@ class UserProfileSmall extends StatelessWidget {
           return const Text('User not found');
         }
 
-        final userData = snapshot.data!.data() as Map<String, dynamic>;
-        final String displayName = userData['displayName'];
-        final String email = userData['email'];
-        final String iconUrl = userData['photoURL'];
+        final BZUser userData = snapshot.data!;
 
         return Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             CircleAvatar(
-              backgroundImage: NetworkImage(iconUrl),
+              backgroundImage: NetworkImage(userData.icon),
               radius: 20,
             ),
             const SizedBox(width: 8),
@@ -47,7 +45,7 @@ class UserProfileSmall extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Text(
-                          displayName + (viewerId == userId ? ' (you)' : ''),
+                          userData.displayName + (viewerId == userId ? ' (you)' : ''),
                           style: const TextStyle(fontWeight: FontWeight.bold),
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -56,7 +54,7 @@ class UserProfileSmall extends StatelessWidget {
                     ],
                   ),
                   Text(
-                    email,
+                    userData.email,
                     style: const TextStyle(color: Colors.grey),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -67,7 +65,7 @@ class UserProfileSmall extends StatelessWidget {
               IconButton(
                 onPressed: () => {
                   Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => ChatScreen(recipientUid: userId),
+                    builder: (context) => ChatScreen(recipient: userData),
                   ))
                 },
                 icon: Icon(Icons.chat),
