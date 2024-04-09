@@ -27,14 +27,14 @@ class UserProfileSmall extends StatelessWidget {
           return const Text('User not found');
         }
 
-        final BZUser userData = snapshot.data!;
+        final BZUser user = snapshot.data!;
 
         return Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             CircleAvatar(
-              backgroundImage: NetworkImage(userData.icon),
-              radius: 20,
+              backgroundImage: NetworkImage(user.icon),
+              radius: 25,
             ),
             const SizedBox(width: 8),
             Expanded(
@@ -45,8 +45,8 @@ class UserProfileSmall extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Text(
-                          userData.displayName + (viewerId == userId ? ' (you)' : ''),
-                          style: const TextStyle(fontWeight: FontWeight.bold),
+                          user.displayName + (viewerId == userId ? ' (you)' : ''),
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -54,8 +54,8 @@ class UserProfileSmall extends StatelessWidget {
                     ],
                   ),
                   Text(
-                    userData.email,
-                    style: const TextStyle(color: Colors.grey),
+                    user.email,
+                    style: const TextStyle(color: Colors.grey, fontSize: 16),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
@@ -65,7 +65,7 @@ class UserProfileSmall extends StatelessWidget {
               IconButton(
                 onPressed: () => {
                   Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => ChatScreen(recipient: userData),
+                    builder: (context) => ChatScreen(recipient: user),
                   ))
                 },
                 icon: Icon(Icons.chat),

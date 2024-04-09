@@ -23,10 +23,10 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       body: Center(
         child: SingleChildScrollView(
-          child: Container(
-            padding: const EdgeInsets.all(12.0),
-            child: Form(
-              key: _formKey,
+          child: Form(
+            key: _formKey,
+            child: SizedBox(
+              width: 300,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
@@ -87,7 +87,7 @@ class _LoginPageState extends State<LoginPage> {
                         );
                       }
                     },
-                    child: const Text('Login'),
+                    child: const Text('Log In'),
                   ),
                   const SizedBox(height: 50),
                   TextButton(

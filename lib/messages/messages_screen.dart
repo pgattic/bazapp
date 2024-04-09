@@ -22,13 +22,9 @@ class _MessagesScreenState extends State<MessagesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Messages'),
-      ),
       body: Column(
         children: [
           _buildSearchBar(),
-          isSearchBarFocused ? _buildUserDropDown() : Container(),
           Expanded(
             child: _buildRecentChats(),
           ),
@@ -40,108 +36,50 @@ class _MessagesScreenState extends State<MessagesScreen> {
   Widget _buildSearchBar() {
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: TextField(
-        controller: searchController,
-        onTap: () {
-          setState(() {
-            isSearchBarFocused = true;
-          });
+      child: SearchAnchor.bar(
+        barHintText: "Search all users",
+        suggestionsBuilder: (BuildContext context, SearchController controller) async {
+          return searchUsersByDisplayName(controller.text);
         },
-        onEditingComplete: () {
-          setState(() {
-            isSearchBarFocused = false;
-          });
-        },
-        onChanged: (value) {
-          setState(() {
-            // Trigger rebuild on search bar text change
-          });
-        },
-        decoration: InputDecoration(
-          labelText: 'Search for users by display name',
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-        ),
       ),
     );
   }
 
-  Widget _buildUserDropDown() {
-    return StreamBuilder<List<BZUser>>(
-      stream: searchUsersByDisplayName(
-        searchController.text.isNotEmpty
-            ? searchController.text
-            : '', // Pass an empty string to get all users when the search is empty
-      ),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          return Text('Error fetching users');
-        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return Container(); // No results, return an empty container
-        } else {
-          List<BZUser> users = snapshot.data!;
-          return Container(
-            height: 160, // Limit the height to show at most 4 users
-            child: ListView.builder(
-              itemCount: users.length > 4 ? 4 : users.length,
-              itemBuilder: (context, index) {
-                return GestureDetector(
-                  onTap: () async {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => ChatScreen(recipient: users[index]),
-                      ),
-                    );
-                  },
-                  child: Card(
-                    margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    child: UserProfileSmall(userId: users[index].uid),
-                  ),
-                );
-              },
-            ),
-          );
-        }
-      },
-    );
-  }
-
-  Stream<List<BZUser>> searchUsersByDisplayName(String displayName) {
-    if (displayName.isEmpty) {
-      // Return all users when displayName is empty
-      return _firestore.collection('users').snapshots().map((snapshot) {
+  Future<List<Widget>> searchUsersByDisplayName(String searchTerm) async {
+    if (searchTerm.isEmpty) {
+      // Return all users when searchTerm is empty
+      return _firestore.collection('users').limit(20).get().then((snapshot) {
         return snapshot.docs.map((doc) {
-          return BZUser(
-            uid: doc.id,
-            displayName: doc['displayName'] as String,
-            email: doc['email'] as String,
-            icon: doc['photoURL'] as String,
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 4.0),
+            child: UserProfileSmall(
+              userId: doc.id,
+              viewerId: getCurrentUserId(),
+            ),
           );
         }).toList();
       });
     } else {
-      // Return filtered users based on displayName
-      var query = _firestore
+      // Return filtered users based on searchTerm
+      return _firestore
           .collection('users')
-          .where('displayName', isGreaterThanOrEqualTo: displayName)
-          .where('displayName', isLessThan: displayName + 'z')
-          .snapshots();
-      return query.map((snapshot) {
+          .where('displayName', isGreaterThanOrEqualTo: searchTerm)
+          .where('displayName', isLessThan: searchTerm + 'z')
+          .limit(20)
+          .get()
+          .then((snapshot) {
         return snapshot.docs.map((doc) {
-          return BZUser(
-            uid: doc.id,
-            displayName: doc['displayName'] as String,
-            email: doc['email'] as String,
-            icon: doc['photoURL'] as String,
+          return Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: UserProfileSmall(
+              userId: doc.id,
+              viewerId: getCurrentUserId(),
+            ),
           );
         }).toList();
       });
     }
   }
-
 
   String? getCurrentUserId() {
     final user = fire.FirebaseAuth.instance.currentUser;
@@ -212,8 +150,8 @@ class _MessagesScreenState extends State<MessagesScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
+          const Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
             child: Text(
               'Your past chats:',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),

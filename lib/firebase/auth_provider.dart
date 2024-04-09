@@ -18,7 +18,7 @@ class BZAuthProvider extends ChangeNotifier {
 
   BZUser? get user => _user;
   UserPreferences? get userPreferences => _userPreferences;
-  Future<String?> getuser() async{
+  Future<String?> getuser() async {
     return FirebaseAuth.instance.currentUser?.uid;
   }
 
@@ -38,7 +38,8 @@ class BZAuthProvider extends ChangeNotifier {
         await user.updateDisplayName(displayName);
 
         // Assign a generic example icon URL
-        const String genericIconUrl = 'https://cdn-icons-png.freepik.com/512/6813/6813762.png';
+        const String genericIconUrl =
+            'https://cdn-icons-png.freepik.com/512/6813/6813762.png';
 
         // Create a user document in Firestore with the generic icon URL
         await _firestore.collection('users').doc(user.uid).set({
@@ -59,7 +60,7 @@ class BZAuthProvider extends ChangeNotifier {
           displayName: displayName,
           icon: genericIconUrl,
         );
-        
+
         _userPreferences = UserPreferences(
           isDarkMode: false,
           calendarViewType: CalendarViewType.day,
@@ -105,11 +106,12 @@ class BZAuthProvider extends ChangeNotifier {
               user.displayName ?? '', // You can handle null display name
           icon: user.photoURL ?? '', // You can assign an icon if needed
         );
-        final doc = await _firestore.collection('user-prefs').doc(user.uid).get();
+        final doc =
+            await _firestore.collection('user-prefs').doc(user.uid).get();
         _userPreferences = UserPreferences(
-          calendarViewType: CalendarViewType.fromString(doc['calendar-view'] as String),
-          isDarkMode: doc['is-dark-mode'] as bool
-        );
+            calendarViewType:
+                CalendarViewType.fromString(doc['calendar-view'] as String),
+            isDarkMode: doc['is-dark-mode'] as bool);
         notifyListeners();
         print('Login successful');
       }
@@ -238,7 +240,9 @@ class BZAuthProvider extends ChangeNotifier {
       final eventToAdd = event.toDBEvent(userId: user.uid);
 
       // Add event to Firestore
-      await FirebaseFirestore.instance.collection('events').add(eventToAdd.toMap());
+      await FirebaseFirestore.instance
+          .collection('events')
+          .add(eventToAdd.toMap());
 
       notifyListeners();
     } catch (e) {
@@ -250,18 +254,18 @@ class BZAuthProvider extends ChangeNotifier {
     try {
       // Remove the event
       await _firestore.collection('events').doc(eventId).delete();
-      
+
       // Also remove event subscriptions tied to the event
       await FirebaseFirestore.instance
           .collection('event-subscriptions')
           .where('event-id', isEqualTo: eventId)
           .get()
           .then((QuerySnapshot querySnapshot) {
-            for (var doc in querySnapshot.docs) {
-              doc.reference.delete();
-            }
-          });
-      
+        for (var doc in querySnapshot.docs) {
+          doc.reference.delete();
+        }
+      });
+
       notifyListeners();
     } catch (e) {
       throw e;
@@ -281,11 +285,11 @@ class BZAuthProvider extends ChangeNotifier {
         final Timestamp timestamp = data['dateTime'];
 
         CustomEvent event = CustomEvent(
-          LatLng(data['latitude']?? 0.0, data['longitude']?? 0.0),
+          LatLng(data['latitude'] ?? 0.0, data['longitude'] ?? 0.0),
           timestamp.toDate(),
           data['title'] ?? '',
           data['description'] ?? '',
-          EventType.fromString(data['eventType']??''),
+          EventType.fromString(data['eventType'] ?? ''),
           eventId,
           data['userId'],
         );
@@ -318,11 +322,11 @@ class BZAuthProvider extends ChangeNotifier {
         final Timestamp timestamp = data['dateTime'];
 
         CustomEvent event = CustomEvent(
-          LatLng(data['latitude']?? 0.0, data['longitude']?? 0.0),
+          LatLng(data['latitude'] ?? 0.0, data['longitude'] ?? 0.0),
           timestamp.toDate(),
           data['title'] ?? '',
           data['description'] ?? '',
-          EventType.fromString(data['eventType']??''),
+          EventType.fromString(data['eventType'] ?? ''),
           eventId,
           data['userId'],
         );
@@ -347,8 +351,9 @@ class BZAuthProvider extends ChangeNotifier {
       // sort by date
       result.sort((a, b) => a.dateTime.compareTo(b.dateTime));
       // remove events that are yesterday or before
-      result.removeWhere((event) => event.dateTime.isBefore(DateTime.now().subtract(Duration(days: 1))));
-      
+      result.removeWhere((event) =>
+          event.dateTime.isBefore(DateTime.now().subtract(Duration(days: 1))));
+
       return result;
     } catch (e) {
       throw e;
@@ -385,7 +390,9 @@ class BZAuthProvider extends ChangeNotifier {
       };
 
       // Add event to Firestore
-      await FirebaseFirestore.instance.collection('event-subscriptions').add(subscription);
+      await FirebaseFirestore.instance
+          .collection('event-subscriptions')
+          .add(subscription);
 
       notifyListeners();
     } catch (e) {
@@ -408,10 +415,10 @@ class BZAuthProvider extends ChangeNotifier {
           .where('event-id', isEqualTo: eventId)
           .get()
           .then((QuerySnapshot querySnapshot) {
-            for (var doc in querySnapshot.docs) {
-              doc.reference.delete();
-            }
-          });
+        for (var doc in querySnapshot.docs) {
+          doc.reference.delete();
+        }
+      });
 
       notifyListeners();
     } catch (e) {
@@ -419,7 +426,8 @@ class BZAuthProvider extends ChangeNotifier {
     }
   }
 
-  Future<List<EventSubscription>> getEventSubscriptionsByUserId(String userId) async {
+  Future<List<EventSubscription>> getEventSubscriptionsByUserId(
+      String userId) async {
     try {
       QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
           .collection('event-subscriptions')
@@ -445,7 +453,8 @@ class BZAuthProvider extends ChangeNotifier {
     }
   }
 
-  Future<List<EventSubscription>> getEventSubscriptionsByEventId(String eventId) async {
+  Future<List<EventSubscription>> getEventSubscriptionsByEventId(
+      String eventId) async {
     try {
       QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
           .collection('event-subscriptions')
@@ -500,11 +509,11 @@ class BZAuthProvider extends ChangeNotifier {
         String eventId = snapshot.id;
 
         CustomEvent event = CustomEvent(
-          LatLng(data['latitude']?? 0.0, data['longitude']?? 0.0),
+          LatLng(data['latitude'] ?? 0.0, data['longitude'] ?? 0.0),
           data['dateTime'].toDate(),
           data['title'] ?? '',
           data['description'] ?? '',
-          EventType.fromString(data['eventType']??''),
+          EventType.fromString(data['eventType'] ?? ''),
           eventId,
           data['userId'],
         );
@@ -529,7 +538,8 @@ class BZAuthProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool?> getEventSubscriptionStatus(String userId, String eventId) async {
+  Future<bool?> getEventSubscriptionStatus(
+      String userId, String eventId) async {
     try {
       QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
           .collection('event-subscriptions')
@@ -548,7 +558,6 @@ class BZAuthProvider extends ChangeNotifier {
   }
 
   static of(BuildContext context) {}
-
 }
 
 class BZUser {
