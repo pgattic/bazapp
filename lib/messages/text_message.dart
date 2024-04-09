@@ -100,7 +100,7 @@ enum GapType {
         );
       case GapType.showTime:
         return Padding(
-          padding: const EdgeInsets.fromLTRB(0.0, 8.0, 0.0, 8.0),
+          padding: const EdgeInsets.fromLTRB(0.0, 20.0, 0.0, 4.0),
           child: Text(TimeFunctions.getFormattedTime(timestamp), style: const TextStyle(fontSize: 12)),
         );
       case GapType.showSmallGap:

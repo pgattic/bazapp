@@ -117,7 +117,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     message['senderId'] == _auth.currentUser!.uid;
                 final GapType gapType = previousMessage == null ? GapType.showDate : GapType.getGapType(
                     (message['timestamp'] as Timestamp).toDate(),
-                    (previousMessage!['timestamp'] as Timestamp).toDate());
+                    (previousMessage['timestamp'] as Timestamp).toDate());
                 return TextMessage(
                   message['text'] as String,
                   (message['timestamp'] as Timestamp).toDate(),
