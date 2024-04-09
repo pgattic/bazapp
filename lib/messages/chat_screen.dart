@@ -112,9 +112,9 @@ class _ChatScreenState extends State<ChatScreen> {
                 final message = _chatMessages[index];
                 final isCurrentUser =
                     message['senderId'] == _auth.currentUser!.uid;
-                final bool showDate = index == 0 ||
-                    _chatMessages[index - 1]['timestamp'].toDate().day !=
-                        message['timestamp'].toDate().day;
+                final bool showDate = index == _chatMessages.length - 1 ||
+                    message['timestamp'].toDate().day !=
+                        _chatMessages[index + 1]['timestamp'].toDate().day;
                 return TextMessage(
                   message['text'] as String,
                   (message['timestamp'] as Timestamp).toDate(),
