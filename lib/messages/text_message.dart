@@ -5,11 +5,11 @@ class TextMessage extends StatefulWidget {
   final String text;
   final DateTime timestamp;
   final bool isCurrentUser;
-  final bool showDate;
+  final GapType gapType;
   final ScrollController? scrollController;
 
   const TextMessage(
-      this.text, this.timestamp, this.isCurrentUser, this.showDate,
+      this.text, this.timestamp, this.isCurrentUser, this.gapType,
       {super.key, this.scrollController});
 
   @override
@@ -34,6 +34,8 @@ class _TextMessageState extends State<TextMessage> {
         ? const EdgeInsets.fromLTRB(72.0, 1.0, 8.0, 1.0)
         : const EdgeInsets.fromLTRB(8.0, 1.0, 72.0, 1.0);
 
+    final gap = widget.gapType.toGap(widget.timestamp);
+
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -45,12 +47,7 @@ class _TextMessageState extends State<TextMessage> {
       },
       child: Column(
         children: [
-          if (widget.showDate)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(0.0, 20.0, 0.0, 8.0),
-              child: Text("${TimeFunctions.getComfyDate(widget.timestamp)} • ${TimeFunctions.getFormattedTime(widget.timestamp)}",
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-            ),
+          gap,
           Align(
             alignment: widget.isCurrentUser
                 ? Alignment.centerRight
@@ -84,5 +81,47 @@ class _TextMessageState extends State<TextMessage> {
         ],
       ),
     );
+  }
+}
+
+enum GapType {
+  showDate,
+  showTime,
+  showSmallGap,
+  showNoGap;
+
+  Widget toGap(DateTime timestamp) {
+    switch (this) {
+      case GapType.showDate:
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(0.0, 20.0, 0.0, 8.0),
+          child: Text("${TimeFunctions.getComfyDate(timestamp)} • ${TimeFunctions.getFormattedTime(timestamp)}",
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+        );
+      case GapType.showTime:
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(0.0, 8.0, 0.0, 8.0),
+          child: Text(TimeFunctions.getFormattedTime(timestamp), style: const TextStyle(fontSize: 12)),
+        );
+      case GapType.showSmallGap:
+        return const SizedBox(
+          height: 8.0,
+        );
+      case GapType.showNoGap:
+        return const SizedBox.shrink();
+    }
+  }
+
+  static GapType getGapType(DateTime currentMessageTimestamp, DateTime previousMessageTimestamp) {
+    if (currentMessageTimestamp.day != previousMessageTimestamp.day) {
+      return GapType.showDate;
+    }
+    if (currentMessageTimestamp.difference(previousMessageTimestamp).inHours >= 1) {
+      return GapType.showTime;
+    }
+    if (currentMessageTimestamp.difference(previousMessageTimestamp).inMinutes >= 1) {
+      return GapType.showSmallGap;
+    }
+    return GapType.showNoGap;
   }
 }

@@ -110,16 +110,19 @@ class _ChatScreenState extends State<ChatScreen> {
               itemCount: _chatMessages.length,
               itemBuilder: (context, index) {
                 final message = _chatMessages[index];
+                final previousMessage = index < (_chatMessages.length - 1)
+                    ? _chatMessages[index + 1]
+                    : null;
                 final isCurrentUser =
                     message['senderId'] == _auth.currentUser!.uid;
-                final bool showDate = index == _chatMessages.length - 1 ||
-                    message['timestamp'].toDate().day !=
-                        _chatMessages[index + 1]['timestamp'].toDate().day;
+                final GapType gapType = previousMessage == null ? GapType.showDate : GapType.getGapType(
+                    (message['timestamp'] as Timestamp).toDate(),
+                    (previousMessage!['timestamp'] as Timestamp).toDate());
                 return TextMessage(
                   message['text'] as String,
                   (message['timestamp'] as Timestamp).toDate(),
                   isCurrentUser,
-                  showDate,
+                  gapType,
                 );
               },
             ),
