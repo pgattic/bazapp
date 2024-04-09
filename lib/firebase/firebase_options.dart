@@ -49,6 +49,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '728787975612',
     projectId: 'bazapp-6c828',
     authDomain: 'bazapp-6c828.firebaseapp.com',
+    databaseURL: 'https://bazapp-6c828-default-rtdb.firebaseio.com',
     storageBucket: 'bazapp-6c828.appspot.com',
     measurementId: 'G-FLJZ6W1TKS',
   );
@@ -58,6 +59,7 @@ class DefaultFirebaseOptions {
     appId: '1:728787975612:android:f4aef7caf2ebd9a0babfb9',
     messagingSenderId: '728787975612',
     projectId: 'bazapp-6c828',
+    databaseURL: 'https://bazapp-6c828-default-rtdb.firebaseio.com',
     storageBucket: 'bazapp-6c828.appspot.com',
   );
 
@@ -66,6 +68,7 @@ class DefaultFirebaseOptions {
     appId: '1:728787975612:ios:1b5ac5cfb8700fbfbabfb9',
     messagingSenderId: '728787975612',
     projectId: 'bazapp-6c828',
+    databaseURL: 'https://bazapp-6c828-default-rtdb.firebaseio.com',
     storageBucket: 'bazapp-6c828.appspot.com',
     iosBundleId: 'com.example.bazapp',
   );
@@ -75,6 +78,7 @@ class DefaultFirebaseOptions {
     appId: '1:728787975612:ios:2a4f93a012f99139babfb9',
     messagingSenderId: '728787975612',
     projectId: 'bazapp-6c828',
+    databaseURL: 'https://bazapp-6c828-default-rtdb.firebaseio.com',
     storageBucket: 'bazapp-6c828.appspot.com',
     iosBundleId: 'com.example.bazapp.RunnerTests',
   );
