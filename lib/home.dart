@@ -31,6 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    _listenForNewMessages(context);
   }
 
   @override
@@ -42,7 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
       themeMode: isDarkMode == null ? ThemeMode.system : isDarkMode ? ThemeMode.dark : ThemeMode.light,
       home: Builder(
         builder: (context) {
-          _listenForNewMessages(context); // Call _listenForNewMessages inside Builder
+           // Call _listenForNewMessages inside Builder
           return Scaffold(
             appBar: AppBar(
               title: GestureDetector(
