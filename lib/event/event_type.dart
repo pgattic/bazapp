@@ -21,6 +21,11 @@ enum EventType {
     icon: Icons.directions_car,
     color: Colors.purple
   ),
+  sports(
+    stringName: "Sports",
+    icon: Icons.sports_basketball,
+    color: Colors.pink,
+  ),
   other(
     stringName: "Other",
     icon: Icons.question_mark,

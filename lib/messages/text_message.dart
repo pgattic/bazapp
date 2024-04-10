@@ -41,9 +41,6 @@ class _TextMessageState extends State<TextMessage> {
         setState(() {
           isHovering = !isHovering;
         });
-        if (widget.scrollController != null) {
-          //widget.scrollController!.animateTo(, duration: Duration(milliseconds: 300), curve: Curves.easeInOut);
-        }
       },
       child: Column(
         children: [
@@ -60,7 +57,7 @@ class _TextMessageState extends State<TextMessage> {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                 child: Text(
                   widget.text,
                   style: TextStyle(fontSize: 16, color: textColor),
@@ -70,7 +67,7 @@ class _TextMessageState extends State<TextMessage> {
           ),
           if (isHovering)
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12.0),
+              padding: const EdgeInsets.symmetric(horizontal: 22.0),
               child: Align(
                 alignment: widget.isCurrentUser
                     ? Alignment.centerRight

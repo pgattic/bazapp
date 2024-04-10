@@ -32,15 +32,16 @@ class CustomEvent {
       this.location, this.dateTime, this.title, this.description, this.type,
       [this.id, this.userId]);
 
-  void displayInfoScreen(BuildContext context) {
-    Navigator.push(
+  Future<bool> displayInfoScreen(BuildContext context) async { // returns true if the dialog should stay open
+    bool result = await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (BuildContext context) {
           return EventInfoScreen(event: this);
         },
       ),
-    );
+    ) ?? true;
+    return result;
   }
 
   void displayBottomSheet(BuildContext context) {
@@ -124,7 +125,7 @@ class CustomEvent {
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(description),
+                  Text(description, maxLines: 2, overflow: TextOverflow.ellipsis),
                   Text(TimeFunctions.getComfyDateTime(dateTime))
                 ],
               ),
