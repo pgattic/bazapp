@@ -17,7 +17,7 @@ Bazapp is a geolocation-based social media app developed using Flutter. It allow
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/your-username/bazapp.git
+   git clone https://github.com/pgattic/bazapp.git
    ```
 2. Navigate to the project directory:
    ```bash
@@ -27,7 +27,8 @@ Bazapp is a geolocation-based social media app developed using Flutter. It allow
    ```bash
    flutter pub get
    ```
-4. Run the app:
+4. You are meant to supply your own API keys into the `lib/firebase/firebase_options.dart` file. We have excluded ours in order to prevent abuse.
+5. Run the app:
    ```bash
    flutter run
    ```
@@ -52,5 +53,5 @@ Bazapp uses the following open-source packages:
 
 ## About
 
-Bazapp was developed by Bryant Van Orden and Preston Corrless as a team for our senior Project at BYUI. For inquiries, contact Supermanismebvo123@gmail.com.
+Bazapp was developed by Bryant Van Orden and Preston Corless as a team for our Senior Project at BYU-Idaho. For inquiries, contact Supermanismebvo123@gmail.com or pgattic@gmail.com.
 
