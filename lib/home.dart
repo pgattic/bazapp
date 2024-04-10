@@ -28,11 +28,12 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0; // Initialize with the default index (e.g., home)
   bool _notificationShown = false;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
     super.initState();
-    _listenForNewMessages(context);
+    _listenForNewMessages();
   }
 
   @override
@@ -46,6 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
         builder: (context) {
            // Call _listenForNewMessages inside Builder
           return Scaffold(
+            key: _scaffoldKey,
             appBar: AppBar(
               title: GestureDetector(
                 onTap: () {
@@ -74,6 +76,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             body: _buildContent(), // Display different content based on selected icon
             bottomNavigationBar: _buildBottomNavigationBar(),
+            
           );
         },
       ),
@@ -159,56 +162,67 @@ class _HomeScreenState extends State<HomeScreen> {
 //    }
 //  }
 
-  void _listenForNewMessages(context) {
-    Timer.periodic(Duration(seconds: 15), (timer) async {
-      print("Trying to get messages");
-      final currentUserUid = FirebaseAuth.instance.currentUser?.uid;
-      if (currentUserUid != null) {
-        try {
-          DateTime now = DateTime.now();
-          DateTime fifteenSecondsAgo = now.subtract(Duration(seconds: 17));
-          final querySnapshot = await FirebaseFirestore.instance
-              .collection('messages')
-              .where('recipientId', isEqualTo: currentUserUid)
-              .where('timestamp', isGreaterThan: fifteenSecondsAgo)
-              .where('timestamp', isLessThan: now)
-              .orderBy('timestamp', descending: true)
-              .limit(1)
-              .get();
-          if (querySnapshot.docs.isNotEmpty && !_notificationShown) {
-            String senderId = querySnapshot.docs[0]['senderId'];
-            showNotificationSnackBar(context, senderId); // Pass senderId to showNotificationSnackBar
-            _notificationShown = true;
-            Timer(Duration(seconds: 30), () {
-              setState(() {
-                _notificationShown = false;
-                print('bool changed');
-              });
+  void _listenForNewMessages() {
+  Timer.periodic(Duration(seconds: 15), (timer) async {
+    print("Trying to get messages");
+    final currentUserUid = FirebaseAuth.instance.currentUser?.uid;
+    if (currentUserUid != null) {
+      try {
+        DateTime now = DateTime.now();
+        DateTime fifteenSecondsAgo = now.subtract(Duration(seconds: 17));
+        final querySnapshot = await FirebaseFirestore.instance
+            .collection('messages')
+            .where('recipientId', isEqualTo: currentUserUid)
+            .where('timestamp', isGreaterThan: fifteenSecondsAgo)
+            .where('timestamp', isLessThan: now)
+            .orderBy('timestamp', descending: true)
+            .limit(1)
+            .get();
+        if (querySnapshot.docs.isNotEmpty && !_notificationShown) {
+          String senderId = querySnapshot.docs[0]['senderId'];
+          showNotificationSnackBar(senderId); // Pass senderId directly
+          _notificationShown = true;
+          Timer(Duration(seconds: 30), () {
+            setState(() {
+              _notificationShown = false;
+              print('bool changed');
             });
-          }
-        } catch (e) {
-          print('Error querying Firestore: $e');
+          });
         }
+      } catch (e) {
+        print('Error querying Firestore: $e');
       }
-    });
-  }
+    }
+  });
+}
 
-  void showNotificationSnackBar(BuildContext context, String senderId) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('You have a new message!'),
-        duration: Duration(seconds: 5),
-        behavior: SnackBarBehavior.floating,
-        margin: EdgeInsets.only(top: 64.0),
-        action: SnackBarAction(
-          label: 'Open Chat',
-          onPressed: () {
-            _openChatWith(senderId);
-          },
-        ),
+
+void showNotificationSnackBar(String senderId) {
+  _scaffoldKey.currentState?.showBottomSheet((context) {
+    Future.delayed(Duration(seconds: 5), () {
+      Navigator.pop(context); // Close the bottom sheet after 5 seconds
+    });
+    return Container(
+      padding: EdgeInsets.all(16.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text('You have a new message!'),
+          ElevatedButton(
+            onPressed: () {
+              _openChatWith(senderId);
+              Navigator.pop(context); // Close the bottom sheet after opening the chat
+            },
+            child: Text('Open Chat'),
+          ),
+        ],
       ),
     );
-  }
+  });
+}
+
+
+
 
   void _openChatWith(String otherUserId) async {
     BZUser otherUser = await Provider.of<BZAuthProvider>(context, listen: false).getUserById(otherUserId);
