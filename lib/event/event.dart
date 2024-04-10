@@ -121,7 +121,7 @@ class CustomEvent {
           children: <Widget>[
             ListTile(
               leading: type.infoScreenIcon,
-              title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+              title: Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.bold)),
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

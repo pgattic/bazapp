@@ -58,4 +58,23 @@ enum EventType {
     }
     return EventType.other;
   }
+
+  static get dropdownItems {
+    List<DropdownMenuItem<EventType>> items = [];
+    for (var type in EventType.values) {
+      items.add(
+        DropdownMenuItem(
+          value: type,
+          child: Row(
+            children: [
+              Icon(type.icon, color: type.color),
+              SizedBox(width: 4),
+              Text(type.stringName),
+            ],
+          ),
+        )
+      );
+    }
+    return items;
+  }
 }

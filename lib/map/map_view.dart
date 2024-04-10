@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:bazapp/constants.dart';
+import 'package:bazapp/event/event_type.dart';
 import 'package:bazapp/firebase/auth_provider.dart';
 import 'package:bazapp/event/create_event_dialog.dart';
 import 'package:flutter/material.dart';
@@ -24,7 +25,7 @@ class _MapViewState extends State<MapView> {
   late StreamSubscription<loc.LocationData> locationSubscription;
   List<CustomEvent> mapEventList = [];
 
-  int attendeesFilter = 0;
+  EventType? filter;
 
   @override
   void initState() {
@@ -120,54 +121,27 @@ class _MapViewState extends State<MapView> {
     }
 
     return Scaffold(
-//      appBar: AppBar(
-//        title: const Text("Map"),
-//        actions: [
-//          const Icon(Icons.filter_alt),
-//          DropdownButton<int>(
-//            value: attendeesFilter,
-//            onChanged: (value) {
-//              if (value == null) return;
-//              setState(() {
-//                attendeesFilter = value;
-//              });
-//            },
-//            items: const [
-//              DropdownMenuItem<int>(
-//                value: 0,
-//                child: Text("Off"),
-//              ),
-//              DropdownMenuItem<int>(
-//                value: 1,
-//                child: Row(
-//                  children: [
-//                    Icon(Icons.person),
-//                    Text("1+"),
-//                  ],
-//                ),
-//              ),
-//              DropdownMenuItem<int>(
-//                value: 5,
-//                child: Row(
-//                  children: [
-//                    Icon(Icons.person),
-//                    Text("5+"),
-//                  ],
-//                ),
-//              ),
-//              DropdownMenuItem<int>(
-//                value: 10,
-//                child: Row(
-//                  children: [
-//                    Icon(Icons.person),
-//                    Text("10+"),
-//                  ],
-//                ),
-//              ),
-//            ],
-//          )
-//        ],
-//      ),
+      appBar: AppBar(
+        title: const Text("Map"),
+        actions: [
+          const Icon(Icons.filter_alt),
+          DropdownButton<EventType?>(
+            value: filter,
+            onChanged: (value) {
+              setState(() {
+                filter = value;
+              });
+            },
+            items: [
+              const DropdownMenuItem(
+                value: null,
+                child: Text("Off"),
+              ),
+              ...EventType.dropdownItems,
+            ],
+          )
+        ],
+      ),
       body: FlutterMap(
         options: MapOptions(
           initialCenter: initialCenter,
@@ -192,6 +166,10 @@ class _MapViewState extends State<MapView> {
           MarkerLayer(
             markers: [
               ...mapEventList
+                  .where((element) {
+                    if (filter == null) return true;
+                    return element.type == filter;
+                  },)
                   .map((mapEvent) => mapEvent.toMarker(context))
                   .toList(),
               if (currentLocation != null)
@@ -221,14 +199,6 @@ class _MapViewState extends State<MapView> {
       ),
     );
   }
-
-//  List<CustomEvent> _getFilteredEvents() {
-//    if (attendeesFilter == 0) {
-//      return mapEventList;
-//    } else {
-//      return mapEventList;
-//    }
-//  }
 
   Future<void> _createEvent(CustomEvent event, BuildContext context) async {
     try {

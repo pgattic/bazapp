@@ -24,7 +24,7 @@ class EventInfoScreen extends StatelessWidget {
           children: [
             Text('Event Details'),
             Spacer(),
-            IconButton(
+            if (user?.uid == event.userId) IconButton(
               icon: const Icon(Icons.delete),
               onPressed: () async {
                 bool deleted = await showDialog(
