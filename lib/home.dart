@@ -163,72 +163,71 @@ class _HomeScreenState extends State<HomeScreen> {
 //  }
 
   void _listenForNewMessages() {
-  Timer.periodic(Duration(seconds: 15), (timer) async {
-    print("Trying to get messages");
-    final currentUserUid = FirebaseAuth.instance.currentUser?.uid;
-    if (currentUserUid != null) {
-      try {
-        DateTime now = DateTime.now();
-        DateTime fifteenSecondsAgo = now.subtract(Duration(seconds: 17));
-        final querySnapshot = await FirebaseFirestore.instance
-            .collection('messages')
-            .where('recipientId', isEqualTo: currentUserUid)
-            .where('timestamp', isGreaterThan: fifteenSecondsAgo)
-            .where('timestamp', isLessThan: now)
-            .orderBy('timestamp', descending: true)
-            .limit(1)
-            .get();
-        if (querySnapshot.docs.isNotEmpty && !_notificationShown) {
-          String senderId = querySnapshot.docs[0]['senderId'];
-          showNotificationSnackBar(senderId); // Pass senderId directly
-          _notificationShown = true;
-          Timer(Duration(seconds: 30), () {
-            setState(() {
-              _notificationShown = false;
-              print('bool changed');
+    Timer.periodic(Duration(seconds: 15), (timer) async {
+      print("Trying to get messages");
+      final currentUserUid = FirebaseAuth.instance.currentUser?.uid;
+      if (currentUserUid != null) {
+        try {
+          DateTime now = DateTime.now();
+          DateTime fifteenSecondsAgo = now.subtract(Duration(seconds: 17));
+          final querySnapshot = await FirebaseFirestore.instance
+              .collection('messages')
+              .where('recipientId', isEqualTo: currentUserUid)
+              .where('timestamp', isGreaterThan: fifteenSecondsAgo)
+              .where('timestamp', isLessThan: now)
+              .orderBy('timestamp', descending: true)
+              .limit(1)
+              .get();
+          if (querySnapshot.docs.isNotEmpty && !_notificationShown) {
+            String senderId = querySnapshot.docs[0]['senderId'];
+            showNotificationSnackBar(senderId); // Pass senderId directly
+            _notificationShown = true;
+            Timer(Duration(seconds: 30), () {
+              setState(() {
+                _notificationShown = false;
+                print('bool changed');
+              });
             });
-          });
+          }
+        } catch (e) {
+          print('Error querying Firestore: $e');
         }
-      } catch (e) {
-        print('Error querying Firestore: $e');
       }
-    }
-  });
-}
-
-
-void showNotificationSnackBar(String senderId) {
-  _scaffoldKey.currentState?.showBottomSheet((context) {
-    Future.delayed(Duration(seconds: 5), () {
-      Navigator.pop(context); // Close the bottom sheet after 5 seconds
     });
-    return Container(
-      padding: EdgeInsets.all(16.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text('You have a new message!'),
-          ElevatedButton(
-            onPressed: () {
-              _openChatWith(senderId);
-            },
-            child: Text('Open Chat'),
-          ),
-        ],
-      ),
-    );
-  });
-}
+  }
 
 
-
+  void showNotificationSnackBar(String senderId) {
+    _scaffoldKey.currentState?.showBottomSheet((context) {
+      Future.delayed(Duration(seconds: 5), () {
+        Navigator.pop(context); // Close the bottom sheet after 5 seconds
+      });
+      return Container(
+        padding: EdgeInsets.all(16.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text('You have a new message!'),
+            ElevatedButton(
+              onPressed: () {
+                _openChatWith(senderId);
+              },
+              child: Text('Open Chat'),
+            ),
+          ],
+        ),
+      );
+    });
+  }
 
   void _openChatWith(String otherUserId) async {
     BZUser otherUser = await Provider.of<BZAuthProvider>(context, listen: false).getUserById(otherUserId);
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => ChatScreen(recipient: otherUser),
-      ),
-    );
+    if (mounted) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => ChatScreen(recipient: otherUser),
+        ),
+      );
+    }
   }
 }
