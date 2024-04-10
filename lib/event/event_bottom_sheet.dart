@@ -48,7 +48,7 @@ class EventBottomSheet extends StatelessWidget {
             children: [
               ElevatedButton(
                 onPressed: () {
-                  event.displayInfoScreen(context);
+                  handleDisplayInfoScreen(context);
                 },
                 child: const Text('More Info'),
               ),
@@ -65,4 +65,12 @@ class EventBottomSheet extends StatelessWidget {
       ),
     );
   }
+
+  void handleDisplayInfoScreen(BuildContext context) async {
+    bool stayOpen = await event.displayInfoScreen(context);
+    if (!stayOpen) {
+      Navigator.pop(context);
+    }
+  }
+
 }

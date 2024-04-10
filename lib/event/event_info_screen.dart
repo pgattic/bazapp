@@ -1,11 +1,13 @@
 import 'package:bazapp/constants.dart';
 import 'package:bazapp/event/subscription_dialog.dart';
 import 'package:bazapp/event/event.dart';
+import 'package:bazapp/firebase/auth_provider.dart';
 import 'package:bazapp/map/map_view_mini.dart';
 import 'package:bazapp/time_functions.dart';
 import 'package:bazapp/user_profile/user_profile_small.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class EventInfoScreen extends StatelessWidget {
   final CustomEvent event;
@@ -22,7 +24,21 @@ class EventInfoScreen extends StatelessWidget {
           children: [
             Text('Event Details'),
             Spacer(),
-            IconButton(icon: const Icon(Icons.delete), onPressed: () => {},),
+            IconButton(
+              icon: const Icon(Icons.delete),
+              onPressed: () async {
+                bool deleted = await showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return DeleteConfirmation();
+                  },
+                )?? false;
+                if (deleted) {
+                  Provider.of<BZAuthProvider>(context, listen: false).removeEvent(event.id!);
+                  Navigator.pop(context, false);
+                }
+              }
+            ),
           ],
         ),
       ),
@@ -74,4 +90,30 @@ class EventInfoScreen extends StatelessWidget {
     );
   }
 
+}
+
+class DeleteConfirmation extends StatelessWidget {
+
+  const DeleteConfirmation({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text('Do you want to delete this event?'),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.pop(context, false); // Close the dialog without selecting
+          },
+          child: Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.pop(context, true); // Pass selectedLocation back
+          },
+          child: Text('Yes'),
+        ),
+      ],
+    );
+  }
 }

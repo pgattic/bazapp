@@ -1,10 +1,10 @@
-
 import 'package:bazapp/firebase/auth_provider.dart';
+import 'package:bazapp/planner/planner_view.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class PreferencesDialog extends StatefulWidget {
-   PreferencesDialog({Key? key}) : super(key: key);
+  PreferencesDialog({Key? key}) : super(key: key);
 
   @override
   State<PreferencesDialog> createState() => _PreferencesDialogState();
@@ -24,7 +24,6 @@ class _PreferencesDialogState extends State<PreferencesDialog> {
     authProvider.addListener(_onAuthProviderChange);
 
     userPreferences = authProvider.userPreferences;
-
   }
 
   void _onAuthProviderChange() {
@@ -48,26 +47,53 @@ class _PreferencesDialogState extends State<PreferencesDialog> {
       title: const Text("Preferences"),
       content: SingleChildScrollView(
         child: Container(
-          padding: const EdgeInsets.all(16.0),
-          child: Column (
-            children: [
+          padding: const EdgeInsets.all(8.0),
+          child: Column(children: [
+            if (userPreferences == null)
+              const CircularProgressIndicator()
+            else
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text("Dark Mode:", style: TextStyle(fontSize: 16)), //Theme.of(context).textTheme.labelLarge
-                  if (userPreferences == null)
-                    const CircularProgressIndicator()
-                  else
-                    Checkbox(
-                      value: userPreferences!.isDarkMode,
-                      onChanged: (value) {
-                        userPreferences!.isDarkMode = value!;
-                        _setUserPrefs();
-                      },
-                    ),
+                  const Text("Dark Theme", style: TextStyle(fontSize: 16)),
+                  Switch(
+                    value: userPreferences!.isDarkMode,
+                    onChanged: (value) {
+                      userPreferences!.isDarkMode = value;
+                      _setUserPrefs();
+                    },
+                  ),
                 ],
-              )
-            ]
-          ),
+              ),
+            const SizedBox(height: 8),
+            const Text("Default Calendar View:",
+                style: TextStyle(fontSize: 16)),
+            SizedBox(
+              child: SegmentedButton<CalendarViewType>(
+                selected: <CalendarViewType>{userPreferences!.calendarViewType},
+                onSelectionChanged: (value) {
+                  setState(() {
+                    userPreferences!.calendarViewType = value.first;
+                    _setUserPrefs();
+                  });
+                },
+                segments: const [
+                  ButtonSegment<CalendarViewType>(
+                    value: CalendarViewType.day,
+                    icon: Icon(Icons.calendar_view_day),
+                  ),
+                  ButtonSegment<CalendarViewType>(
+                    value: CalendarViewType.week,
+                    icon: Icon(Icons.calendar_view_week),
+                  ),
+                  ButtonSegment<CalendarViewType>(
+                    value: CalendarViewType.month,
+                    icon: Icon(Icons.calendar_view_month),
+                  ),
+                ],
+              ),
+            ),
+          ]),
         ),
       ),
     );

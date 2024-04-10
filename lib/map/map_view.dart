@@ -120,54 +120,54 @@ class _MapViewState extends State<MapView> {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Map"),
-        actions: [
-          const Icon(Icons.filter_alt),
-          DropdownButton<int>(
-            value: attendeesFilter,
-            onChanged: (value) {
-              if (value == null) return;
-              setState(() {
-                attendeesFilter = value;
-              });
-            },
-            items: const [
-              DropdownMenuItem<int>(
-                value: 0,
-                child: Text("Off"),
-              ),
-              DropdownMenuItem<int>(
-                value: 1,
-                child: Row(
-                  children: [
-                    Icon(Icons.person),
-                    Text("1+"),
-                  ],
-                ),
-              ),
-              DropdownMenuItem<int>(
-                value: 5,
-                child: Row(
-                  children: [
-                    Icon(Icons.person),
-                    Text("5+"),
-                  ],
-                ),
-              ),
-              DropdownMenuItem<int>(
-                value: 10,
-                child: Row(
-                  children: [
-                    Icon(Icons.person),
-                    Text("10+"),
-                  ],
-                ),
-              ),
-            ],
-          )
-        ],
-      ),
+//      appBar: AppBar(
+//        title: const Text("Map"),
+//        actions: [
+//          const Icon(Icons.filter_alt),
+//          DropdownButton<int>(
+//            value: attendeesFilter,
+//            onChanged: (value) {
+//              if (value == null) return;
+//              setState(() {
+//                attendeesFilter = value;
+//              });
+//            },
+//            items: const [
+//              DropdownMenuItem<int>(
+//                value: 0,
+//                child: Text("Off"),
+//              ),
+//              DropdownMenuItem<int>(
+//                value: 1,
+//                child: Row(
+//                  children: [
+//                    Icon(Icons.person),
+//                    Text("1+"),
+//                  ],
+//                ),
+//              ),
+//              DropdownMenuItem<int>(
+//                value: 5,
+//                child: Row(
+//                  children: [
+//                    Icon(Icons.person),
+//                    Text("5+"),
+//                  ],
+//                ),
+//              ),
+//              DropdownMenuItem<int>(
+//                value: 10,
+//                child: Row(
+//                  children: [
+//                    Icon(Icons.person),
+//                    Text("10+"),
+//                  ],
+//                ),
+//              ),
+//            ],
+//          )
+//        ],
+//      ),
       body: FlutterMap(
         options: MapOptions(
           initialCenter: initialCenter,
@@ -222,13 +222,13 @@ class _MapViewState extends State<MapView> {
     );
   }
 
-  List<CustomEvent> _getFilteredEvents() {
-    if (attendeesFilter == 0) {
-      return mapEventList;
-    } else {
-      return mapEventList;
-    }
-  }
+//  List<CustomEvent> _getFilteredEvents() {
+//    if (attendeesFilter == 0) {
+//      return mapEventList;
+//    } else {
+//      return mapEventList;
+//    }
+//  }
 
   Future<void> _createEvent(CustomEvent event, BuildContext context) async {
     try {

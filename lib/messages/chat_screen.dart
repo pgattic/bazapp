@@ -43,7 +43,7 @@ class _ChatScreenState extends State<ChatScreen> {
           .orderBy('timestamp', descending: false)
           .snapshots()
           .listen((snapshot) {
-        snapshot.docChanges.forEach((change) {
+        for (var change in snapshot.docChanges) {
           if (change.type == DocumentChangeType.added) {
             final message = change.doc.data()!;
             // Add the message to the list
@@ -55,7 +55,7 @@ class _ChatScreenState extends State<ChatScreen> {
             // Trigger a notification for the new message
             // _showNotification(message?['text'] as String);
           }
-        });
+        }
       });
     }
   }
@@ -85,7 +85,7 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.recipient.displayName),
+        title: Text("Chat with ${widget.recipient.displayName}"),
       ),
       body: Column(
         children: [
@@ -137,7 +137,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     ),
                   ),
                 ),
-                ElevatedButton(
+                IconButton(
                   onPressed: () {
                     final text = _messageController.text.trim();
                     if (text.isNotEmpty) {
@@ -145,7 +145,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       _messageController.clear();
                     }
                   },
-                  child: Text('Send'),
+                  icon: Icon(Icons.send),
                 ),
               ],
             ),
