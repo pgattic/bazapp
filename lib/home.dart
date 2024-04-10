@@ -15,6 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:bazapp/firebase/auth_provider.dart' as fire;
 import 'package:provider/provider.dart';
 
+
 class HomeScreen extends StatefulWidget {
   final fire.BZUser user; // Receive user information
   final fire.UserPreferences? userPreferences; // Receive user information
