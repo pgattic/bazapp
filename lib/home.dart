@@ -211,7 +211,6 @@ void showNotificationSnackBar(String senderId) {
           ElevatedButton(
             onPressed: () {
               _openChatWith(senderId);
-              Navigator.pop(context); // Close the bottom sheet after opening the chat
             },
             child: Text('Open Chat'),
           ),
